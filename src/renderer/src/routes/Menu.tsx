@@ -1,6 +1,7 @@
 import galleryIcon from '../../../../resources/gallery.png?asset';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Menu = () => {
   return (
@@ -16,7 +17,9 @@ const Menu = () => {
       <p className="mt-4 text-xs text-muted-foreground">Drag and drop an image or use the buttons below</p>
       <Separator className="w-3/5" />
       <div className="flex w-1/2 flex-col space-y-2">
-        <Button>Select File</Button>
+        <Button asChild>
+          <Link to="/view">Select File</Link>
+        </Button>
         <Button>Select Directory</Button>
       </div>
     </div>

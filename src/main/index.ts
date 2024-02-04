@@ -1,6 +1,6 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron';
-import { join } from 'path';
+import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+import { join } from 'path';
 
 function createWindow(): void {
   // Create the browser window.
@@ -53,6 +53,11 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'));
+
+  protocol.handle('atom', (request) => {
+    const path = '/' + request.url.slice('atom://'.length);
+    return net.fetch(`file://${path}`);
+  });
 
   createWindow();
 

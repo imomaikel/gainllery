@@ -35,3 +35,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.fitObject {
+  @apply h-auto max-h-[100%] w-auto max-w-[100%] object-contain object-center;
+}
