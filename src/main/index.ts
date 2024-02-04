@@ -7,14 +7,17 @@ function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    minHeight: 500,
+    minWidth: 500,
     show: false,
-    autoHideMenuBar: true,
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
     },
   });
+
+  mainWindow.removeMenu();
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
