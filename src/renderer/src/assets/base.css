@@ -39,3 +39,10 @@
 .fitObject {
   @apply h-auto max-h-[100%] w-auto max-w-[100%] object-contain object-center;
 }
+#titleBar {
+  -webkit-app-region: drag;
+}
+.titleButtons div[role='button'],
+.titleButtons a {
+  -webkit-app-region: no-drag;
+}

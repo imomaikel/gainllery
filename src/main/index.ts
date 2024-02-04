@@ -2,14 +2,16 @@ import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { join } from 'path';
 
+let mainWindow: BrowserWindow | undefined;
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     minHeight: 500,
     minWidth: 500,
     show: false,
+    frame: false,
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -20,7 +22,7 @@ function createWindow(): void {
   mainWindow.removeMenu();
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
+    mainWindow?.show();
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -51,8 +53,19 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'));
+  ipcMain.on('windowMinimize', () => {
+    mainWindow?.minimize();
+  });
+  ipcMain.on('windowMaximize', () => {
+    if (mainWindow?.isMaximized()) {
+      mainWindow?.unmaximize();
+    } else {
+      mainWindow?.maximize();
+    }
+  });
+  ipcMain.on('windowClose', () => {
+    mainWindow?.close();
+  });
 
   protocol.handle('atom', (request) => {
     const path = '/' + request.url.slice('atom://'.length);
