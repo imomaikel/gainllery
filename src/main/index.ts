@@ -8,8 +8,8 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
-    minHeight: 500,
-    minWidth: 500,
+    minHeight: 520,
+    minWidth: 520,
     show: false,
     frame: false,
     // ...(process.platform === 'linux' ? { icon } : {}),

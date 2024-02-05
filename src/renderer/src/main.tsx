@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import TitleBar from './components/TitleBar';
+import Settings from './routes/Settings';
 import ReactDOM from 'react-dom/client';
 import Menu from './routes/Menu';
 import View from './routes/View';
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
       {
         path: '/view',
         element: <View />,
+      },
+      {
+        path: '/settings',
+        element: <Settings />,
       },
     ],
   },

@@ -46,3 +46,6 @@
 .titleButtons a {
   -webkit-app-region: no-drag;
 }
+.titleIcon {
+  @apply rounded px-1.5 py-0 transition-colors hover:bg-muted-foreground/25;
+}
