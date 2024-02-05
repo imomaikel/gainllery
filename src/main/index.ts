@@ -1,17 +1,20 @@
-import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron';
+import { app, shell, BrowserWindow, protocol, net, ipcMain } from 'electron';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+import handleFiles from './drop-handler';
+import Store from 'electron-store';
 import { join } from 'path';
 
 let mainWindow: BrowserWindow | undefined;
+export const store = new Store();
+
 function createWindow(): void {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 520,
+    height: 520,
     minHeight: 520,
     minWidth: 520,
     show: false,
-    frame: false,
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -42,7 +45,11 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // dropHandler();
+  ipcMain.on('filesToFetch', async (event) => {
+    event.returnValue = await handleFiles();
+  });
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');
 
@@ -53,23 +60,16 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  ipcMain.on('windowMinimize', () => {
-    mainWindow?.minimize();
-  });
-  ipcMain.on('windowMaximize', () => {
-    if (mainWindow?.isMaximized()) {
-      mainWindow?.unmaximize();
-    } else {
-      mainWindow?.maximize();
-    }
-  });
-  ipcMain.on('windowClose', () => {
-    mainWindow?.close();
-  });
-
   protocol.handle('atom', (request) => {
     const path = '/' + request.url.slice('atom://'.length);
     return net.fetch(`file://${path}`);
+  });
+
+  ipcMain.on('electron-store-get', async (event, key) => {
+    event.returnValue = store.get(key);
+  });
+  ipcMain.on('electron-store-set', async (_, key, val) => {
+    store.set(key, val);
   });
 
   createWindow();
