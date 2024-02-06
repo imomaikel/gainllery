@@ -7,6 +7,16 @@ import { join } from 'path';
 let mainWindow: BrowserWindow | undefined;
 export const store = new Store();
 
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'atom',
+    privileges: {
+      bypassCSP: true,
+      stream: true,
+    },
+  },
+]);
+
 function createWindow(): void {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -19,6 +29,7 @@ function createWindow(): void {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
+      webSecurity: true,
     },
   });
 
@@ -61,10 +72,9 @@ app.whenReady().then(async () => {
   });
 
   protocol.handle('atom', (request) => {
-    const path = '/' + request.url.slice('atom://'.length);
-    return net.fetch(`file://${path}`);
+    const path = 'file:///' + request.url.slice('atom://'.length);
+    return net.fetch(path);
   });
-
   ipcMain.on('electron-store-get', async (event, key) => {
     event.returnValue = store.get(key);
   });

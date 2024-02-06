@@ -30,12 +30,14 @@ export const getAllFilesRecursively = async (path: string): Promise<string[]> =>
   const getFiles = async (_path: string) => {
     const directories = await readdir(_path, { withFileTypes: true }).catch(() => []);
     const files = await Promise.all(
-      directories.map((dirent) => {
-        const filePath = resolve(_path, dirent.name);
-        if (dirent.isDirectory()) return getFiles(filePath);
-        const fileName = dirent.name.substring(dirent.name.lastIndexOf('.'));
-        if (FILE_TYPES.includes(fileName)) return filePath;
-      }),
+      directories
+        .map((dirent) => {
+          const filePath = resolve(_path, dirent.name);
+          if (dirent.isDirectory()) return getFiles(filePath);
+          const fileName = dirent.name.substring(dirent.name.lastIndexOf('.'));
+          if (FILE_TYPES.includes(fileName)) return filePath;
+        })
+        .filter((v) => v),
     );
     return files.flat();
   };
