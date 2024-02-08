@@ -1,13 +1,15 @@
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { getFetchedFiles } from '@/lib/storage';
 
 const View = () => {
-  const fetchedImages = window.store.get('fetchedFiles') as string[];
+  const fetchedImages = useMemo(() => getFetchedFiles(), []);
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const [index, setIndex] = useState(0);
   const [scope, animate] = useAnimate();
+  const whileChange = useRef(false);
 
   // State
   const isNext = index + 1 !== fetchedImages.length;
@@ -18,11 +20,13 @@ const View = () => {
   const animation: ValueAnimationTransition = { type: 'keyframes', duration: 0.15 };
   const nextFile = () => {
     if (!isNext) return;
+    whileChange.current = true;
     setIndex(index + 1);
     animate(scope.current, { x: ['100%', '0%'] }, { ...animation });
   };
   const previousFile = () => {
     if (!isPrevious) return;
+    whileChange.current = true;
     setIndex(index - 1);
     animate(scope.current, { x: ['-100%', '0%'] }, { ...animation });
   };
@@ -31,14 +35,27 @@ const View = () => {
   useEffect(() => {
     const onResize = () => {
       // TODO Settings
-      transformComponentRef.current?.centerView(1, 0);
+      transformComponentRef.current?.centerView(1, 1);
     };
 
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const onLoad = () => transformComponentRef.current?.centerView(1, 0);
+  const onLoad = () => {
+    transformComponentRef.current?.centerView(1, 1);
+  };
+
+  const onPanning = () => {
+    if (!whileChange.current) return;
+    transformComponentRef.current?.instance.setCenter();
+  };
+  const onPanningStop = () => {
+    whileChange.current = false;
+  };
+  const onPanningStart = () => {
+    whileChange.current = false;
+  };
 
   // Key binds
   useEffect(() => {
@@ -60,14 +77,18 @@ const View = () => {
   return (
     <div className="relative flex h-screen w-screen items-center">
       <TransformWrapper
-        disablePadding
+        alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
         wheel={{ step: 0.2, smoothStep: 0.003 }}
         ref={transformComponentRef}
         centerOnInit
+        disablePadding
+        onPanning={onPanning}
+        onPanningStart={onPanningStart}
+        onPanningStop={onPanningStop}
       >
         <TransformComponent wrapperClass="!w-screen !h-screen">
           <div ref={scope}>
-            {url.endsWith('mp4') || url.endsWith('mp3') ? (
+            {url.endsWith('mp4') || url.endsWith('mp3') || url.endsWith('m4v') ? (
               <video
                 src={url}
                 controls

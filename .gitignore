@@ -5,3 +5,4 @@ out
 *.log*
 /build
 /out
+electron.vite.config.*.mjs

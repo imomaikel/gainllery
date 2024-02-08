@@ -18,9 +18,7 @@ const DropHandler = () => {
 
         window.store.set('filesToFetch', filesToFetch);
         const fetched = window.electron.ipcRenderer.sendSync('filesToFetch');
-        console.log(fetched);
         if (fetched) {
-          console.log('red');
           navigate('/view');
         }
       },

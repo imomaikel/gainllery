@@ -30,9 +30,7 @@ const App = (): JSX.Element => {
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-hidden">
       <DndProvider backend={HTML5Backend}>
-        {/* <DropHandler> */}
         <RouterProvider router={router} />
-        {/* </DropHandler> */}
       </DndProvider>
     </div>
   );
