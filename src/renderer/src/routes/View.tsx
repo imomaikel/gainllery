@@ -1,8 +1,9 @@
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import ImageControls from '@/components/ImageControls';
 import { getFetchedFiles } from '@/lib/storage';
+import { filePathToUrl } from '@/lib/utils';
 
 const View = () => {
   const fetchedImages = useMemo(() => getFetchedFiles(), []);
@@ -72,7 +73,9 @@ const View = () => {
   }, [nextFile, previousFile]);
 
   // TODO
-  const url = `atom://${fetchedImages[index].replace(/ /gi, '%20').replace(/\?/gi, '%3F')}`;
+  const url = filePathToUrl(fetchedImages[index]);
+  const isVideo = url.endsWith('mp4') || url.endsWith('mp3') || url.endsWith('m4v');
+  const isImage = !isVideo;
 
   return (
     <div className="relative flex h-screen w-screen items-center">
@@ -88,7 +91,7 @@ const View = () => {
       >
         <TransformComponent wrapperClass="!w-screen !h-screen">
           <div ref={scope}>
-            {url.endsWith('mp4') || url.endsWith('mp3') || url.endsWith('m4v') ? (
+            {isVideo ? (
               <video
                 src={url}
                 controls
@@ -103,10 +106,15 @@ const View = () => {
         </TransformComponent>
       </TransformWrapper>
 
-      <div className="fixed top-0 flex w-full justify-center space-x-2">
-        <Button onClick={previousFile}>PREV</Button>
-        <Button onClick={nextFile}>NEXT</Button>
-      </div>
+      {isImage && (
+        <ImageControls
+          isNext={isNext}
+          isPrevious={isPrevious}
+          onNext={() => nextFile()}
+          onPrevious={() => previousFile()}
+          ref={transformComponentRef}
+        />
+      )}
     </div>
   );
 };

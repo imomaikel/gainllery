@@ -19,7 +19,11 @@ const DropHandler = () => {
         window.store.set('filesToFetch', filesToFetch);
         const fetched = window.electron.ipcRenderer.sendSync('filesToFetch');
         if (fetched) {
-          navigate('/view');
+          if (window.location.href.endsWith('/view')) {
+            window.location.reload();
+          } else {
+            navigate('/view');
+          }
         }
       },
       collect: (monitor: DropTargetMonitor) => {
