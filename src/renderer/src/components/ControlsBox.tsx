@@ -1,15 +1,17 @@
 import { ChevronUpIcon } from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 type TControlsBox = {
   children: React.ReactNode;
   visible: boolean;
   onShow: () => void;
+  className?: string;
 };
-const ControlsBox = ({ children, visible, onShow }: TControlsBox) => {
+const ControlsBox = ({ children, visible, onShow, className }: TControlsBox) => {
   return (
     <>
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2">
+      <div className={cn('fixed bottom-0 left-1/2 -translate-x-1/2', className)}>
         <motion.div
           animate={{
             ...(!visible && {

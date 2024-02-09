@@ -4,11 +4,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import ImageControls from '@/components/ImageControls';
 import { getFetchedFiles } from '@/lib/storage';
 import { filePathToUrl } from '@/lib/utils';
+import Video from '@/components/Video';
 
 const View = () => {
   const fetchedImages = useMemo(() => getFetchedFiles(), []);
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(14);
   const [scope, animate] = useAnimate();
   const whileChange = useRef(false);
 
@@ -92,13 +93,7 @@ const View = () => {
         <TransformComponent wrapperClass="!w-screen !h-screen">
           <div ref={scope}>
             {isVideo ? (
-              <video
-                src={url}
-                controls
-                className="max-h-screen object-contain"
-                draggable={false}
-                onLoadedData={onLoad}
-              />
+              <Video path={url} onLoad={onLoad} />
             ) : (
               <img src={url} className="max-h-screen object-contain" onLoad={onLoad} />
             )}
