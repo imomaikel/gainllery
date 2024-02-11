@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, protocol, net, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, protocol, ipcMain } from 'electron';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import handleFiles from './drop-handler';
 import Store from 'electron-store';
@@ -7,15 +7,15 @@ import { join } from 'path';
 let mainWindow: BrowserWindow | undefined;
 export const store = new Store();
 
-protocol.registerSchemesAsPrivileged([
-  {
-    scheme: 'atom',
-    privileges: {
-      bypassCSP: true,
-      stream: true,
-    },
-  },
-]);
+// protocol.registerSchemesAsPrivileged([
+//   {
+//     scheme: 'atom',
+//     privileges: {
+//       bypassCSP: true,
+//       stream: true,
+//     },
+//   },
+// ]);
 
 function createWindow(): void {
   // Create the browser window.
@@ -71,10 +71,16 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  protocol.handle('atom', (request) => {
-    const path = 'file:///' + request.url.slice('atom://'.length);
-    return net.fetch(path);
+  // protocol.handle('atom', (request) => {
+  //   const path = 'file:///' + request.url.slice('atom://'.length);
+  //   return net.fetch(path);
+  // });
+  // https://github.com/electron/electron/issues/38749
+  protocol.registerFileProtocol('atom', (req, cb) => {
+    const url = req.url.slice('atom://'.length);
+    cb({ path: url });
   });
+
   ipcMain.on('electron-store-get', async (event, key) => {
     event.returnValue = store.get(key);
   });

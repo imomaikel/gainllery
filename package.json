@@ -39,7 +39,6 @@
     "match-sorter": "^6.3.3",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
-    "react-player": "^2.14.1",
     "react-router-dom": "^6.22.0",
     "react-zoom-pan-pinch": "^3.4.2",
     "sort-by": "^0.0.2",

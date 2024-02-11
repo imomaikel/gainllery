@@ -1,14 +1,14 @@
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
+import { ElementRef, useEffect, useMemo, useRef, useState } from 'react';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import VideoControls from '@/components/VideoControls';
 import ImageControls from '@/components/ImageControls';
 import { getFetchedFiles } from '@/lib/storage';
-import { filePathToUrl } from '@/lib/utils';
-import Video from '@/components/Video';
 
 const View = () => {
   const fetchedImages = useMemo(() => getFetchedFiles(), []);
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
+  const videoRef = useRef<ElementRef<'video'>>(null);
   const [index, setIndex] = useState(14);
   const [scope, animate] = useAnimate();
   const whileChange = useRef(false);
@@ -74,7 +74,7 @@ const View = () => {
   }, [nextFile, previousFile]);
 
   // TODO
-  const url = filePathToUrl(fetchedImages[index]);
+  const url = `atom://${fetchedImages[index]}`;
   const isVideo = url.endsWith('mp4') || url.endsWith('mp3') || url.endsWith('m4v');
   const isImage = !isVideo;
 
@@ -85,6 +85,7 @@ const View = () => {
         wheel={{ step: 0.2, smoothStep: 0.003 }}
         ref={transformComponentRef}
         centerOnInit
+        maxScale={20}
         disablePadding
         onPanning={onPanning}
         onPanningStart={onPanningStart}
@@ -93,7 +94,13 @@ const View = () => {
         <TransformComponent wrapperClass="!w-screen !h-screen">
           <div ref={scope}>
             {isVideo ? (
-              <Video path={url} onLoad={onLoad} />
+              <video
+                ref={videoRef}
+                className="max-h-screen object-contain"
+                src={url}
+                onLoadedData={onLoad}
+                preload="auto"
+              />
             ) : (
               <img src={url} className="max-h-screen object-contain" onLoad={onLoad} />
             )}
@@ -110,6 +117,7 @@ const View = () => {
           ref={transformComponentRef}
         />
       )}
+      {isVideo && <VideoControls ref={videoRef} />}
     </div>
   );
 };
