@@ -9,7 +9,7 @@ const View = () => {
   const fetchedImages = useMemo(() => getFetchedFiles(), []);
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const videoRef = useRef<ElementRef<'video'>>(null);
-  const [index, setIndex] = useState(14);
+  const [index, setIndex] = useState(20);
   const [scope, animate] = useAnimate();
   const whileChange = useRef(false);
 
