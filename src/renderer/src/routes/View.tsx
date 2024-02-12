@@ -9,7 +9,7 @@ const View = () => {
   const fetchedImages = useMemo(() => getFetchedFiles(), []);
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const videoRef = useRef<ElementRef<'video'>>(null);
-  const [index, setIndex] = useState(20);
+  const [index, setIndex] = useState(6);
   const [scope, animate] = useAnimate();
   const whileChange = useRef(false);
 
@@ -19,7 +19,7 @@ const View = () => {
 
   // Switch files
   // TODO Settings
-  const animation: ValueAnimationTransition = { type: 'keyframes', duration: 0.15 };
+  const animation: ValueAnimationTransition = { type: 'keyframes', duration: 0.25 };
   const nextFile = () => {
     if (!isNext) return;
     whileChange.current = true;
@@ -117,7 +117,16 @@ const View = () => {
           ref={transformComponentRef}
         />
       )}
-      {isVideo && <VideoControls ref={videoRef} />}
+      {isVideo && (
+        <VideoControls
+          ref={videoRef}
+          isNext={isNext}
+          isPrevious={isPrevious}
+          onNext={() => nextFile()}
+          onPrevious={() => previousFile()}
+          index={index}
+        />
+      )}
     </div>
   );
 };
