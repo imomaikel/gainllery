@@ -4,6 +4,7 @@ import fs from 'fs';
 
 const readdir = promisify(fs.readdir);
 
+// TODO
 const FILE_TYPES = [
   '.mp4',
   '.jpg',
@@ -17,7 +18,6 @@ const FILE_TYPES = [
   '.gif',
   '.mkv',
   '.m4a',
-  '.mp3',
   '.exe',
   '.m4v',
   '.MOV',

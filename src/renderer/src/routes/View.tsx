@@ -3,17 +3,22 @@ import { ElementRef, RefObject, useEffect, useMemo, useRef, useState } from 'rea
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
 import VideoControls from '@/components/VideoControls';
 import ImageControls from '@/components/ImageControls';
-import { getFetchedFiles } from '@/lib/storage';
+import { useSettings } from '@/hooks/settings';
 
 const View = () => {
-  const fetchedImages = useMemo(() => getFetchedFiles(), []);
-  const rotate = useRef('0');
+  const settings = useSettings();
+
+  const fetchedImages = useMemo(() => settings.get('fetchedFiles') ?? [], []);
+
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
-  const [scope, animate] = useAnimate<ElementRef<'div'>>();
   const videoRef = useRef<ElementRef<'video'>>(null);
   const imageRef = useRef<ElementRef<'img'>>(null);
-  const [index, setIndex] = useState(34);
   const whileChange = useRef(false);
+  const rotate = useRef('0');
+
+  const [scope, animate] = useAnimate<ElementRef<'div'>>();
+
+  const [index, setIndex] = useState(0);
 
   // State
   const isNext = index + 1 !== fetchedImages.length;
@@ -46,8 +51,13 @@ const View = () => {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const onLoad = () => {
-    onRotate('0');
+  const onLoad = async () => {
+    if (rotate.current !== '0') {
+      onRotate('0');
+    } else {
+      await animate(scope.current, { width: 'auto', height: 'auto' }, { duration: 0 });
+      transformComponentRef.current?.centerView(1, 1);
+    }
   };
 
   const onPanning = () => {
@@ -120,8 +130,6 @@ const View = () => {
     onRotate(newDeg);
   };
 
-  console.log(url, isVideo);
-
   return (
     <div className="relative flex h-screen w-screen items-center">
       <TransformWrapper
@@ -138,15 +146,7 @@ const View = () => {
         <TransformComponent wrapperClass="!w-screen !h-screen">
           <div ref={scope} className="flex max-w-[100vw] items-center justify-center">
             {isVideo ? (
-              <video
-                ref={videoRef}
-                className="max-h-screen object-contain"
-                onLoadedData={onLoad}
-                preload="auto"
-                controls
-              >
-                <source src={url} type="video/mp4" />
-              </video>
+              <video ref={videoRef} className="max-h-screen object-contain" onLoadedData={onLoad} src={url} />
             ) : (
               <img src={url} ref={imageRef} className="max-h-screen object-contain" onLoad={onLoad} />
             )}
