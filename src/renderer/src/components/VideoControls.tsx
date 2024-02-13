@@ -1,6 +1,7 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import React, { ElementRef, RefObject, useEffect, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
+import { FaRotateRight, FaRotateLeft } from 'react-icons/fa6';
 import { FaPlay, FaPause } from 'react-icons/fa6';
 import { AiFillSound } from 'react-icons/ai';
 import { IoMdMore } from 'react-icons/io';
@@ -17,9 +18,10 @@ type TVideoControls = {
   onNext: () => void;
   onPrevious: () => void;
   index: number;
+  rotateMedia: (direction: 'LEFT' | 'RIGHT') => void;
 };
 const VideoControls = React.forwardRef<ElementRef<'video'>, TVideoControls>(
-  ({ isNext, isPrevious, onNext, onPrevious, index }, _ref) => {
+  ({ isNext, isPrevious, onNext, onPrevious, index, rotateMedia }, _ref) => {
     const ref = _ref as RefObject<ElementRef<'video'>>;
     const [totalTextDuration, setTotalTextDuration] = useState('00:00');
     const [currentSecond, setCurrentSecond] = useState(0);
@@ -134,10 +136,19 @@ const VideoControls = React.forwardRef<ElementRef<'video'>, TVideoControls>(
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="relative w-min" align="center">
-                <div>
+                <div className="space-y-4">
                   <div className="flex items-center space-x-2">
                     <Label htmlFor="repeat">Repeat</Label>
                     <Checkbox id="repeat" onCheckedChange={() => onRepeat()} checked={autoRepeat} />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Label>Rotate</Label>
+                    <Button size="smallIcon" onClick={() => rotateMedia('LEFT')}>
+                      <FaRotateLeft />
+                    </Button>
+                    <Button size="smallIcon" onClick={() => rotateMedia('RIGHT')}>
+                      <FaRotateRight />
+                    </Button>
                   </div>
                 </div>
               </PopoverContent>

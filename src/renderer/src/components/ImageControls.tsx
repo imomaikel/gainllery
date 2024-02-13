@@ -7,6 +7,7 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from '@radix-ui/react-icons';
+import { FaRotateLeft, FaRotateRight } from 'react-icons/fa6';
 import { ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import React, { RefObject, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -18,10 +19,11 @@ type TImageControls = {
   isNext: boolean;
   onNext: () => void;
   onPrevious: () => void;
+  rotateMedia: (direction: 'LEFT' | 'RIGHT') => void;
 };
 
 const ImageControls = React.forwardRef<ReactZoomPanPinchRef, TImageControls>(
-  ({ isNext, isPrevious, onNext, onPrevious }, _ref) => {
+  ({ isNext, isPrevious, onNext, onPrevious, rotateMedia }, _ref) => {
     const ref = _ref as RefObject<ReactZoomPanPinchRef>;
     const [menuVisible, setMenuVisible] = useState(true);
 
@@ -47,6 +49,14 @@ const ImageControls = React.forwardRef<ReactZoomPanPinchRef, TImageControls>(
               </div>
               <div role="button" onClick={zoomOut}>
                 <ZoomOutIcon className="h-8 w-8 rounded-full bg-primary" />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div role="button" onClick={() => rotateMedia('LEFT')}>
+                <FaRotateLeft className="h-8 w-8 rounded-full bg-primary" />
+              </div>
+              <div role="button" onClick={() => rotateMedia('RIGHT')}>
+                <FaRotateRight className="h-8 w-8 rounded-full bg-primary" />
               </div>
             </div>
             <div className="flex items-center space-x-2">

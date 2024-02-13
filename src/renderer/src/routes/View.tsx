@@ -1,5 +1,5 @@
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import { ElementRef, useEffect, useMemo, useRef, useState } from 'react';
+import { ElementRef, RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
 import VideoControls from '@/components/VideoControls';
 import ImageControls from '@/components/ImageControls';
@@ -7,10 +7,12 @@ import { getFetchedFiles } from '@/lib/storage';
 
 const View = () => {
   const fetchedImages = useMemo(() => getFetchedFiles(), []);
+  const rotate = useRef('0');
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
+  const [scope, animate] = useAnimate<ElementRef<'div'>>();
   const videoRef = useRef<ElementRef<'video'>>(null);
-  const [index, setIndex] = useState(6);
-  const [scope, animate] = useAnimate();
+  const imageRef = useRef<ElementRef<'img'>>(null);
+  const [index, setIndex] = useState(34);
   const whileChange = useRef(false);
 
   // State
@@ -37,7 +39,7 @@ const View = () => {
   useEffect(() => {
     const onResize = () => {
       // TODO Settings
-      transformComponentRef.current?.centerView(1, 1);
+      rotateOnResize();
     };
 
     window.addEventListener('resize', onResize);
@@ -45,7 +47,7 @@ const View = () => {
   }, []);
 
   const onLoad = () => {
-    transformComponentRef.current?.centerView(1, 1);
+    onRotate('0');
   };
 
   const onPanning = () => {
@@ -75,8 +77,50 @@ const View = () => {
 
   // TODO
   const url = `atom://${fetchedImages[index]}`;
-  const isVideo = url.endsWith('mp4') || url.endsWith('mp3') || url.endsWith('m4v');
+  const isVideo = url.endsWith('mp4') || url.endsWith('mp3') || url.endsWith('m4v') || url.endsWith('mov');
   const isImage = !isVideo;
+
+  const onRotate = async (deg: string) => {
+    const mediaRef: RefObject<ElementRef<'video'>> | RefObject<ElementRef<'img'>> | null = imageRef.current
+      ? imageRef
+      : videoRef.current
+        ? videoRef
+        : null;
+    if (!mediaRef || !mediaRef.current) return;
+
+    const invert = deg === '90' || deg === '270';
+    const maxHeightVp = invert ? '100vw' : '100vh';
+    const maxWidthVp = invert ? '100vh' : '100vw';
+
+    mediaRef.current.style.rotate = `${deg}deg`;
+    mediaRef.current.style.maxHeight = maxHeightVp;
+    mediaRef.current.style.maxWidth = maxWidthVp;
+
+    const newHeight = mediaRef.current.height || mediaRef.current.clientHeight;
+    const newWidth = mediaRef.current.width || mediaRef.current.clientWidth;
+
+    animate(mediaRef.current, { opacity: [0, 1] }, { duration: 0.25 });
+    await animate(
+      scope.current,
+      { width: invert ? newHeight : newWidth, height: invert ? newWidth : newHeight },
+      { duration: 0 },
+    );
+
+    rotate.current = deg;
+    transformComponentRef.current?.centerView(1, 1);
+  };
+  const rotateOnResize = async () => {
+    await onRotate(rotate.current);
+    transformComponentRef.current?.centerView(1, 1);
+  };
+  const rotateMedia = (direction: 'RIGHT' | 'LEFT') => {
+    let newDeg: string = (parseInt(rotate.current) + (direction === 'RIGHT' ? 90 : -90)).toString();
+    if (newDeg === '-90') newDeg = '270';
+    if (newDeg === '360') newDeg = '0';
+    onRotate(newDeg);
+  };
+
+  console.log(url, isVideo);
 
   return (
     <div className="relative flex h-screen w-screen items-center">
@@ -92,17 +136,19 @@ const View = () => {
         onPanningStop={onPanningStop}
       >
         <TransformComponent wrapperClass="!w-screen !h-screen">
-          <div ref={scope}>
+          <div ref={scope} className="flex max-w-[100vw] items-center justify-center">
             {isVideo ? (
               <video
                 ref={videoRef}
                 className="max-h-screen object-contain"
-                src={url}
                 onLoadedData={onLoad}
                 preload="auto"
-              />
+                controls
+              >
+                <source src={url} type="video/mp4" />
+              </video>
             ) : (
-              <img src={url} className="max-h-screen object-contain" onLoad={onLoad} />
+              <img src={url} ref={imageRef} className="max-h-screen object-contain" onLoad={onLoad} />
             )}
           </div>
         </TransformComponent>
@@ -114,6 +160,7 @@ const View = () => {
           isPrevious={isPrevious}
           onNext={() => nextFile()}
           onPrevious={() => previousFile()}
+          rotateMedia={(direction: 'LEFT' | 'RIGHT') => rotateMedia(direction)}
           ref={transformComponentRef}
         />
       )}
@@ -122,6 +169,7 @@ const View = () => {
           ref={videoRef}
           isNext={isNext}
           isPrevious={isPrevious}
+          rotateMedia={(direction: 'LEFT' | 'RIGHT') => rotateMedia(direction)}
           onNext={() => nextFile()}
           onPrevious={() => previousFile()}
           index={index}
