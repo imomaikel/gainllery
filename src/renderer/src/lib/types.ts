@@ -8,4 +8,7 @@ export type SETTINGS = {
   fetchedFiles: {
     valueType: string[];
   };
+  autoPlay: {
+    valueType: boolean;
+  };
 };

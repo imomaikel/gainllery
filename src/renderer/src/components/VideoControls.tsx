@@ -3,6 +3,7 @@ import React, { ElementRef, RefObject, useEffect, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 import { FaRotateRight, FaRotateLeft } from 'react-icons/fa6';
 import { FaPlay, FaPause } from 'react-icons/fa6';
+import { useSettings } from '@/hooks/settings';
 import { AiFillSound } from 'react-icons/ai';
 import { IoMdMore } from 'react-icons/io';
 import { Checkbox } from './ui/checkbox';
@@ -23,14 +24,17 @@ type TVideoControls = {
 const VideoControls = React.forwardRef<ElementRef<'video'>, TVideoControls>(
   ({ isNext, isPrevious, onNext, onPrevious, index, rotateMedia }, _ref) => {
     const ref = _ref as RefObject<ElementRef<'video'>>;
+
+    const settings = useSettings();
+
+    const [autoPlay, setAutoPlay] = useState(settings.get('autoPlay', false));
     const [totalTextDuration, setTotalTextDuration] = useState('00:00');
     const [currentSecond, setCurrentSecond] = useState(0);
+    const [autoRepeat, setAutoRepeat] = useState(false);
     const [mounted, setIsMounted] = useState(false);
     const [duration, setDuration] = useState(0);
-    const [volume, setVolume] = useState(1);
-
-    const [autoRepeat, setAutoRepeat] = useState(false);
     const [pause, setPause] = useState(true);
+    const [volume, setVolume] = useState(0);
 
     useEffect(() => {
       setIsMounted(true);
@@ -54,7 +58,14 @@ const VideoControls = React.forwardRef<ElementRef<'video'>, TVideoControls>(
       const onPause = () => {
         setPause(true);
       };
+
       if (ref.current) {
+        onVolume(settings.get('videoVolume', 1));
+        onRepeat(settings.get('videoLoop', false));
+        if (settings.get('autoPlay', false)) {
+          ref.current.play().catch(() => {});
+        }
+
         ref.current.addEventListener('loadedmetadata', updateDuration);
         ref.current.addEventListener('timeupdate', onTimeUpdate);
         ref.current.addEventListener('ended', onEnd);
@@ -88,17 +99,25 @@ const VideoControls = React.forwardRef<ElementRef<'video'>, TVideoControls>(
       ref.current.currentTime = newSecond;
       setCurrentSecond(newSecond);
     };
+
     const onVolume = (newVolume: number) => {
       if (ref.current) {
         ref.current.volume = newVolume;
         setVolume(newVolume);
+        settings.set('videoVolume', newVolume);
       }
     };
-    const onRepeat = () => {
+    const onRepeat = (forceState?: boolean) => {
       if (ref.current) {
-        ref.current.loop = !autoRepeat;
-        setAutoRepeat(!autoRepeat);
+        const newState = forceState !== undefined ? forceState : !autoRepeat;
+        ref.current.loop = newState;
+        setAutoRepeat(newState);
+        settings.set('videoLoop', newState);
       }
+    };
+    const onAutoPlay = () => {
+      settings.set('autoPlay', !autoPlay);
+      setAutoPlay(!autoPlay);
     };
 
     if (!mounted || !ref.current) return null;
@@ -140,6 +159,10 @@ const VideoControls = React.forwardRef<ElementRef<'video'>, TVideoControls>(
                   <div className="flex items-center space-x-2">
                     <Label htmlFor="repeat">Repeat</Label>
                     <Checkbox id="repeat" onCheckedChange={() => onRepeat()} checked={autoRepeat} />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor="repeat">Auto play</Label>
+                    <Checkbox id="repeat" onCheckedChange={() => onAutoPlay()} checked={autoPlay} />
                   </div>
                   <div className="flex items-center space-x-2">
                     <Label>Rotate</Label>

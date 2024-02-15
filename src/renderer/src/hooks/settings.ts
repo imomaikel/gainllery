@@ -3,15 +3,12 @@ import { SETTINGS } from '@/lib/types';
 export const useSettings = () => {
   const get = <T extends keyof SETTINGS>(
     key: T,
-    overwriteIfEmpty?: SETTINGS[T]['valueType'],
-  ): SETTINGS[T]['valueType'] | null => {
+    overwriteIfEmpty: SETTINGS[T]['valueType'],
+  ): SETTINGS[T]['valueType'] => {
     const value = window.store.get(key) as ReturnType<typeof get>;
-    if (!value) {
-      if (overwriteIfEmpty) {
-        window.store.set(key, overwriteIfEmpty);
-        return overwriteIfEmpty;
-      }
-      return null;
+    if (value === undefined) {
+      window.store.set(key, overwriteIfEmpty);
+      return overwriteIfEmpty;
     }
     return value;
   };

@@ -8,7 +8,7 @@ import { useSettings } from '@/hooks/settings';
 const View = () => {
   const settings = useSettings();
 
-  const fetchedImages = useMemo(() => settings.get('fetchedFiles') ?? [], []);
+  const fetchedImages = useMemo(() => settings.get('fetchedFiles', []), []);
 
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const videoRef = useRef<ElementRef<'video'>>(null);
