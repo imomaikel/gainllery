@@ -1,5 +1,6 @@
-import { app, shell, BrowserWindow, protocol, ipcMain } from 'electron';
-import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+import { BrowserWindow, app, dialog, ipcMain, protocol, shell } from 'electron';
+import { electronApp, is, optimizer } from '@electron-toolkit/utils';
+import { FILE_TYPES, getAllFilesRecursively } from './files';
 import handleFiles from './drop-handler';
 import Store from 'electron-store';
 import { join } from 'path';
@@ -57,9 +58,69 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  // dropHandler();
   ipcMain.on('filesToFetch', async (event) => {
     event.returnValue = await handleFiles();
+  });
+
+  // Menu buttons
+  ipcMain.on('openFile', async () => {
+    const pick = await dialog.showOpenDialog({
+      filters: [
+        {
+          name: 'Media',
+          extensions: FILE_TYPES,
+        },
+      ],
+      title: 'Select one or more files',
+      properties: ['multiSelections', 'openFile'],
+    });
+    if (pick.canceled) {
+      mainWindow?.webContents.send('fetchingCancelled');
+      return;
+    }
+
+    mainWindow?.webContents.send('fetchingFile');
+
+    const paths = pick.filePaths;
+
+    const directories: string[] = [];
+    let files: string[] = [];
+
+    for (const path of paths) {
+      const isFile = FILE_TYPES.includes(path.substring(path.lastIndexOf('.') + 1));
+      if (!isFile) {
+        directories.push(path);
+      } else {
+        files.push(path);
+      }
+    }
+
+    const filesInDirectories = (await Promise.all(directories.map((path) => getAllFilesRecursively(path)))).flat();
+    files = files.concat(filesInDirectories);
+
+    store.set('fetchedFiles', files);
+
+    mainWindow?.webContents.send('filesFetched');
+  });
+
+  ipcMain.on('openDirectory', async () => {
+    const pick = await dialog.showOpenDialog({
+      title: 'Select one or more directories',
+      properties: ['openDirectory', 'multiSelections'],
+    });
+    if (pick.canceled) {
+      mainWindow?.webContents.send('fetchingCancelled');
+      return;
+    }
+
+    mainWindow?.webContents.send('fetchingFile');
+
+    const paths = pick.filePaths;
+    const filesInDirectories = (await Promise.all(paths.map((path) => getAllFilesRecursively(path)))).flat();
+
+    store.set('fetchedFiles', filesInDirectories);
+
+    mainWindow?.webContents.send('filesFetched');
   });
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');
