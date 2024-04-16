@@ -1,14 +1,22 @@
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import { ElementRef, RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { ElementRef, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
 import VideoControls from '@/components/VideoControls';
 import ImageControls from '@/components/ImageControls';
 import { useSettings } from '@/hooks/settings';
+import { debounce } from 'lodash';
 
 const View = () => {
   const settings = useSettings();
 
   const fetchedImages = useMemo(() => settings.get('fetchedFiles', []), []);
+
+  const centerView = useCallback(
+    debounce(() => {
+      transformComponentRef.current?.centerView(1, 1);
+    }, 10),
+    [],
+  );
 
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const videoRef = useRef<ElementRef<'video'>>(null);
@@ -44,7 +52,7 @@ const View = () => {
   useEffect(() => {
     const onResize = () => {
       // TODO Settings
-      rotateOnResize();
+      centerView();
     };
 
     window.addEventListener('resize', onResize);
@@ -56,7 +64,7 @@ const View = () => {
       onRotate('0');
     } else {
       await animate(scope.current, { width: 'auto', height: 'auto' }, { duration: 0 });
-      transformComponentRef.current?.centerView(1, 1);
+      centerView();
     }
   };
 
@@ -117,12 +125,12 @@ const View = () => {
     );
 
     rotate.current = deg;
-    transformComponentRef.current?.centerView(1, 1);
+    centerView();
   };
-  const rotateOnResize = async () => {
-    await onRotate(rotate.current);
-    transformComponentRef.current?.centerView(1, 1);
-  };
+  // const rotateOnResize = async () => {
+  //   await onRotate(rotate.current);
+  //   centerView();
+  // };
   const rotateMedia = (direction: 'RIGHT' | 'LEFT') => {
     let newDeg: string = (parseInt(rotate.current) + (direction === 'RIGHT' ? 90 : -90)).toString();
     if (newDeg === '-90') newDeg = '270';
