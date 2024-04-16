@@ -1,6 +1,8 @@
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { ElementRef, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
+import ContextMenuOptions from '@/components/ContextMenuOptions';
 import VideoControls from '@/components/VideoControls';
 import ImageControls from '@/components/ImageControls';
 import { useSettings } from '@/hooks/settings';
@@ -140,27 +142,32 @@ const View = () => {
 
   return (
     <div className="relative flex h-screen w-screen items-center">
-      <TransformWrapper
-        alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
-        wheel={{ step: 0.2, smoothStep: 0.003 }}
-        ref={transformComponentRef}
-        centerOnInit
-        maxScale={20}
-        disablePadding
-        onPanning={onPanning}
-        onPanningStart={onPanningStart}
-        onPanningStop={onPanningStop}
-      >
-        <TransformComponent wrapperClass="!w-screen !h-screen">
-          <div ref={scope} className="flex max-w-[100vw] items-center justify-center">
-            {isVideo ? (
-              <video ref={videoRef} className="max-h-screen object-contain" onLoadedData={onLoad} src={url} />
-            ) : (
-              <img src={url} ref={imageRef} className="max-h-screen object-contain" onLoad={onLoad} />
-            )}
-          </div>
-        </TransformComponent>
-      </TransformWrapper>
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <TransformWrapper
+            alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
+            wheel={{ step: 0.2, smoothStep: 0.003 }}
+            ref={transformComponentRef}
+            centerOnInit
+            maxScale={20}
+            disablePadding
+            onPanning={onPanning}
+            onPanningStart={onPanningStart}
+            onPanningStop={onPanningStop}
+          >
+            <TransformComponent wrapperClass="!w-screen !h-screen">
+              <div ref={scope} className="flex max-w-[100vw] items-center justify-center">
+                {isVideo ? (
+                  <video ref={videoRef} className="max-h-screen object-contain" onLoadedData={onLoad} src={url} />
+                ) : (
+                  <img src={url} ref={imageRef} className="max-h-screen object-contain" onLoad={onLoad} />
+                )}
+              </div>
+            </TransformComponent>
+          </TransformWrapper>
+        </ContextMenuTrigger>
+        <ContextMenuOptions />
+      </ContextMenu>
 
       {isImage && (
         <ImageControls
