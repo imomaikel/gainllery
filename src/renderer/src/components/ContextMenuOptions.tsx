@@ -17,6 +17,7 @@ const ContextMenuOptions = ({ currentPath }: TContextMenuOptions) => {
       >
         Select Directory
       </ContextMenuItem>
+      <ContextMenuItem onClick={() => sendToIpcRenderer('openCurrentFile', currentPath)}>Select File</ContextMenuItem>
     </ContextMenuContent>
   );
 };
