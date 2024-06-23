@@ -139,7 +139,7 @@ app.whenReady().then(async () => {
   // https://github.com/electron/electron/issues/38749
   protocol.registerFileProtocol('atom', (req, cb) => {
     const url = req.url.slice('atom://'.length);
-    cb({ path: url });
+    cb({ path: decodeURIComponent(url) });
   });
 
   ipcMain.on('electron-store-get', async (event, key) => {

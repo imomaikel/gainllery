@@ -4,7 +4,7 @@ import fs from 'fs';
 
 const readdir = promisify(fs.readdir);
 
-const VIDEO_TYPES = ['mp4', 'mov', 'webm', 'mkv', 'm4a', 'm4v'];
+const VIDEO_TYPES = ['mp4', 'mov', 'webm', 'm4a', 'm4v'];
 const IMAGE_TYPES = ['jpg', 'webp', 'jpeg', 'png', 'gif'];
 export const FILE_TYPES = VIDEO_TYPES.concat(IMAGE_TYPES);
 
