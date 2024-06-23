@@ -4,13 +4,16 @@ import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
 import ContextMenuOptions from '@/components/ContextMenuOptions';
 import SideMenuButton from '@/components/SideMenuButton';
+import BreadcrumbPath from '@/components/BreadcrumbPath';
 import VideoControls from '@/components/VideoControls';
 import ImageControls from '@/components/ImageControls';
 import { useSearchParams } from 'react-router-dom';
 import { useSettings } from '@/hooks/settings';
+import { useEventListener } from 'usehooks-ts';
 import SideMenu from '@/components/SideMenu';
 import { debounce } from 'lodash';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const View = () => {
   const settings = useSettings();
@@ -35,10 +38,18 @@ const View = () => {
   const imageRef = useRef<ElementRef<'img'>>(null);
   const whileChange = useRef(false);
   const rotate = useRef('0');
+  const [whileRenaming, setWhileRenaming] = useState(false);
 
   const [scope, animate] = useAnimate<ElementRef<'div'>>();
 
   const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const selectFileOnStart = searchParams.get('select');
+    if (!selectFileOnStart) return;
+    const findIndex = fetchedFiles.findIndex((path) => path === selectFileOnStart);
+    if (findIndex) setIndex(findIndex);
+  }, []);
 
   const handleItemTrash = async () => {
     const itemToTrash = fetchedFiles[index];
@@ -102,18 +113,14 @@ const View = () => {
   };
 
   // Key binds
-  useEffect(() => {
-    const handleKeypress = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowRight') {
-        nextFile();
-      } else if (event.key === 'ArrowLeft') {
-        previousFile();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeypress);
-    return () => window.removeEventListener('keydown', handleKeypress);
-  }, [nextFile, previousFile]);
+  useEventListener('keydown', (event) => {
+    if (whileRenaming) return;
+    if (event.key === 'ArrowRight') {
+      nextFile();
+    } else if (event.key === 'ArrowLeft') {
+      previousFile();
+    }
+  });
 
   // TODO
   const currentFilePath = fetchedFiles[index];
@@ -197,6 +204,30 @@ const View = () => {
 
   const isInFavorites = () => {
     return favorites.includes(currentFilePath);
+  };
+
+  const handleFileRename = async (path: string, newName: string) => {
+    const newPath = await window.electron.ipcRenderer.sendSync('renameFile', path, newName);
+
+    if (newPath) {
+      setFetchedFiles((files) =>
+        files.map((file) => {
+          if (file !== path) return file;
+          return newPath;
+        }),
+      );
+      settings.set(
+        'fetchedFiles',
+        settings.get('fetchedFiles', []).map((file) => {
+          if (file !== path) return file;
+          return newPath;
+        }),
+      );
+
+      toast.success('Renamed!');
+    } else {
+      toast.error('Failed to rename!');
+    }
   };
 
   return (
@@ -321,6 +352,15 @@ const View = () => {
           onItemTrash={handleItemTrash}
         />
       )}
+      <BreadcrumbPath
+        currentPath={currentFilePath}
+        selectDirectory={(path) => {
+          console.log('view', path);
+        }}
+        onRename={handleFileRename}
+        setWhileRenaming={setWhileRenaming}
+        whileRenaming={whileRenaming}
+      />
     </div>
   );
 };

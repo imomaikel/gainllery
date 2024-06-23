@@ -6,7 +6,12 @@ type TSideMenuButton = {
 };
 const SideMenuButton = ({ onClick }: TSideMenuButton) => {
   return (
-    <Button size="icon" onClick={onClick} variant="outline" className="ml-2 mt-2">
+    <Button
+      size="icon"
+      onClick={onClick}
+      variant="outline"
+      className="ml-3 mt-6 opacity-50 transition-opacity hover:opacity-100"
+    >
       <HamburgerMenuIcon className="h-6 w-6" />
     </Button>
   );

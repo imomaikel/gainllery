@@ -156,6 +156,34 @@ app.whenReady().then(async () => {
     }
   });
 
+  ipcMain.on('renameFile', async (event, ...args) => {
+    try {
+      const oldPath = args[0];
+      const newName = args[1];
+
+      const newPath = path.resolve(oldPath, '..', newName);
+
+      try {
+        await renameFile(oldPath, newPath);
+        event.returnValue = newPath;
+      } catch {
+        const readStream = fs.createReadStream(oldPath);
+        const writeStream = fs.createWriteStream(newPath);
+        readStream.pipe(writeStream);
+        readStream
+          .on('end', async () => {
+            await unlinkFile(oldPath);
+            event.returnValue = newPath;
+          })
+          .on('error', () => {
+            event.returnValue = false;
+          });
+      }
+    } catch {
+      event.returnValue = false;
+    }
+  });
+
   ipcMain.on('addFavoriteDirectory', async (event) => {
     const pick = await dialog.showOpenDialog({
       title: 'Select one or more directories',

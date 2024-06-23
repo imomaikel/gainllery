@@ -26,3 +26,19 @@ export const getHMS = (baseSeconds: number, baseDuration: number): string[] => {
   }
   return [textMinutes, textSeconds];
 };
+
+export const formatPath = (path: string, showExtension?: boolean) => {
+  let fileName = path.substring(path.lastIndexOf('/') + 1);
+  if (fileName.length >= 15) {
+    if (showExtension) {
+      if (fileName.includes('.')) {
+        const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+        fileName = fileName.substring(0, 12) + `...${extension}`;
+        return fileName;
+      }
+    }
+    fileName = fileName.substring(0, 15) + '...';
+  }
+
+  return fileName;
+};
