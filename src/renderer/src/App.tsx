@@ -5,6 +5,7 @@ import Settings from './routes/Settings';
 import { DndProvider } from 'react-dnd';
 import Menu from './routes/Menu';
 import View from './routes/View';
+import { Toaster } from 'sonner';
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,7 @@ const App = (): JSX.Element => {
       <DndProvider backend={HTML5Backend}>
         <RouterProvider router={router} />
       </DndProvider>
+      <Toaster theme="dark" position="top-left" toastOptions={{ style: { width: '25vw', maxWidth: '480px' } }} />
     </div>
   );
 };
