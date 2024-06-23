@@ -1,9 +1,9 @@
 import galleryIcon from '../../../../resources/gallery.png?asset';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSettings } from '@/hooks/settings';
 import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { useSettings } from '@/hooks/settings';
 import { HashLoader } from 'react-spinners';
 
 const Menu = () => {
@@ -17,6 +17,7 @@ const Menu = () => {
 
   const openFiles = () => window.electron.ipcRenderer.send('openFile');
   const openDirectories = () => window.electron.ipcRenderer.send('openDirectory');
+  const openFavorites = () => navigate('/view?type=favorites');
 
   useEffect(() => {
     window.electron.ipcRenderer.on('filesFetched', () => {
@@ -69,6 +70,7 @@ const Menu = () => {
                 <Link to="/view">Open Previous</Link>
               </Button>
             )}
+            <Button onClick={openFavorites}>Open Favorites</Button>
             <Button onClick={openFiles}>Select File</Button>
             <Button onClick={openDirectories}>Select Directory</Button>
           </>

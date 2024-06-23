@@ -49,3 +49,23 @@
 .titleIcon {
   @apply rounded px-1.5 py-0 transition-colors hover:bg-muted-foreground/25;
 }
+
+/* width */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  @apply rounded-xl bg-secondary;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  @apply rounded-xl bg-white/25;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  @apply rounded-xl bg-primary;
+}

@@ -14,4 +14,7 @@ export type SETTINGS = {
   sideMenuOpen: {
     valueType: boolean;
   };
+  favorites: {
+    valueType: string[];
+  };
 };

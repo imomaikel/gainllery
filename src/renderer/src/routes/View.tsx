@@ -6,6 +6,7 @@ import ContextMenuOptions from '@/components/ContextMenuOptions';
 import SideMenuButton from '@/components/SideMenuButton';
 import VideoControls from '@/components/VideoControls';
 import ImageControls from '@/components/ImageControls';
+import { useSearchParams } from 'react-router-dom';
 import { useSettings } from '@/hooks/settings';
 import SideMenu from '@/components/SideMenu';
 import { debounce } from 'lodash';
@@ -21,8 +22,13 @@ const View = () => {
     [],
   );
 
-  const [fetchedImages, setFetchedImages] = useState<string[]>(settings.get('fetchedFiles', []));
+  const [searchParams] = useSearchParams();
+
+  const [fetchedImages, setFetchedImages] = useState<string[]>(
+    searchParams.get('type') === 'favorites' ? settings.get('favorites', []) : settings.get('fetchedFiles', []),
+  );
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(settings.get('sideMenuOpen', false));
+  const [favorites, setFavorites] = useState<string[]>(settings.get('favorites', []));
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const videoRef = useRef<ElementRef<'video'>>(null);
   const imageRef = useRef<ElementRef<'img'>>(null);
@@ -162,6 +168,26 @@ const View = () => {
       {isSideMenuOpen ? (
         <div className="w-[150px]">
           <SideMenu
+            isFavorite={favorites.includes(fetchedImages[index])}
+            onFavoriteSwitch={() => {
+              const itemUrl = fetchedImages[index];
+              if (favorites.includes(itemUrl)) {
+                setFavorites((prev) => prev.filter((entryUrl) => entryUrl !== itemUrl));
+                settings.set(
+                  'favorites',
+                  settings.get('favorites', []).filter((entryUrl) => entryUrl !== itemUrl),
+                );
+
+                if (searchParams.get('type') === 'favorites') {
+                  const copy = [...fetchedImages];
+                  copy.splice(index, 1);
+                  setFetchedImages(copy);
+                }
+              } else {
+                setFavorites((prev) => prev.concat(itemUrl));
+                settings.set('favorites', settings.get('favorites', []).concat(itemUrl));
+              }
+            }}
             onClose={() => {
               setIsSideMenuOpen(false);
               settings.set('sideMenuOpen', false);
