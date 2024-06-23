@@ -3,10 +3,13 @@ import { ElementRef, RefObject, useCallback, useEffect, useMemo, useRef, useStat
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
 import ContextMenuOptions from '@/components/ContextMenuOptions';
+import SideMenuButton from '@/components/SideMenuButton';
 import VideoControls from '@/components/VideoControls';
 import ImageControls from '@/components/ImageControls';
 import { useSettings } from '@/hooks/settings';
+import SideMenu from '@/components/SideMenu';
 import { debounce } from 'lodash';
+import { cn } from '@/lib/utils';
 
 const View = () => {
   const settings = useSettings();
@@ -20,6 +23,7 @@ const View = () => {
     [],
   );
 
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(settings.get('sideMenuOpen', false));
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const videoRef = useRef<ElementRef<'video'>>(null);
   const imageRef = useRef<ElementRef<'img'>>(null);
@@ -140,8 +144,31 @@ const View = () => {
     onRotate(newDeg);
   };
 
+  useEffect(() => {
+    centerView();
+  }, [isSideMenuOpen]);
+
   return (
     <div className="relative flex h-screen w-screen items-center">
+      {isSideMenuOpen ? (
+        <div className="w-[150px]">
+          <SideMenu
+            onClose={() => {
+              setIsSideMenuOpen(false);
+              settings.set('sideMenuOpen', false);
+            }}
+          />
+        </div>
+      ) : (
+        <div className="fixed left-0 top-0 z-50">
+          <SideMenuButton
+            onClick={() => {
+              setIsSideMenuOpen(true);
+              settings.set('sideMenuOpen', true);
+            }}
+          />
+        </div>
+      )}
       <ContextMenu>
         <ContextMenuTrigger>
           <TransformWrapper
@@ -155,8 +182,14 @@ const View = () => {
             onPanningStart={onPanningStart}
             onPanningStop={onPanningStop}
           >
-            <TransformComponent wrapperClass="!w-screen !h-screen">
-              <div ref={scope} className="flex max-w-[100vw] items-center justify-center">
+            <TransformComponent wrapperClass={cn('!w-screen !h-screen', isSideMenuOpen && '!w-[calc(100vw-150px)]')}>
+              <div
+                ref={scope}
+                className={cn(
+                  'max-w-screen flex items-center justify-center',
+                  isSideMenuOpen && 'max-w-[calc(100vw-150px)]',
+                )}
+              >
                 {isVideo ? (
                   <video ref={videoRef} className="max-h-screen object-contain" onLoadedData={onLoad} src={url} />
                 ) : (

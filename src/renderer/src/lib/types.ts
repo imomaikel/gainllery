@@ -11,4 +11,7 @@ export type SETTINGS = {
   autoPlay: {
     valueType: boolean;
   };
+  sideMenuOpen: {
+    valueType: boolean;
+  };
 };
