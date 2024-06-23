@@ -17,14 +17,11 @@ const Menu = () => {
 
   const openFiles = () => window.electron.ipcRenderer.send('openFile');
   const openDirectories = () => window.electron.ipcRenderer.send('openDirectory');
-  const openFavorites = () => navigate('/browse?type=favorites');
+  const browseFavorites = () => navigate('/browse?type=favorites');
+  const selectDirectory = () => window.electron.ipcRenderer.send('selectDirectory');
 
   useEffect(() => {
     window.electron.ipcRenderer.on('filesFetched', () => {
-      if (intervalId.current) {
-        clearInterval(intervalId.current);
-        intervalId.current = null;
-      }
       setIsLoading(false);
       navigate('/view');
     });
@@ -35,6 +32,14 @@ const Menu = () => {
       const showExtraMessageId = setInterval(() => setShowExtra(true), 6_000);
       intervalId.current = showExtraMessageId;
     });
+
+    window.electron.ipcRenderer.on('directoryReadyToBrowse', (_, ...args) => {
+      navigate(`/browse?path=${args[0]}`);
+    });
+
+    return () => {
+      if (intervalId.current) clearInterval(intervalId.current);
+    };
   }, []);
 
   return (
@@ -59,9 +64,10 @@ const Menu = () => {
                 <Link to="/view">Open Previous</Link>
               </Button>
             )}
-            <Button onClick={openFavorites}>Open Favorites</Button>
-            <Button onClick={openFiles}>Select File</Button>
-            <Button onClick={openDirectories}>Select Directory</Button>
+            <Button onClick={openDirectories}>Open Directory</Button>
+            <Button onClick={openFiles}>Open File</Button>
+            <Button onClick={browseFavorites}>Browse Favorites</Button>
+            <Button onClick={selectDirectory}>Browse Directory</Button>
           </>
         )}
       </div>

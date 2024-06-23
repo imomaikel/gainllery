@@ -28,8 +28,8 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 520,
     height: 520,
-    minHeight: 560,
-    minWidth: 400,
+    minHeight: 640,
+    minWidth: 440,
     show: false,
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -244,6 +244,19 @@ app.whenReady().then(async () => {
     }
 
     fetchFilesInDirectoryAndSendBroadcast(pick.filePaths);
+  });
+
+  ipcMain.on('selectDirectory', async () => {
+    const pick = await dialog.showOpenDialog({
+      title: 'Select a directory',
+      properties: ['openDirectory'],
+    });
+    if (pick.canceled) {
+      mainWindow?.webContents.send('fetchingCancelled');
+      return;
+    }
+
+    mainWindow?.webContents.send('directoryReadyToBrowse', pick.filePaths[0]);
   });
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');
