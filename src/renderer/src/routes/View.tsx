@@ -235,14 +235,6 @@ const View = () => {
       {isSideMenuOpen ? (
         <div className="w-[150px]">
           <SideMenu
-            isFavorite={favorites.includes(currentFilePath)}
-            onFavoriteSwitch={() => {
-              if (isInFavorites()) {
-                removeFromFavorites();
-              } else {
-                addToFavorites();
-              }
-            }}
             onClose={() => {
               setIsSideMenuOpen(false);
               settings.set('sideMenuOpen', false);
@@ -326,7 +318,17 @@ const View = () => {
             </TransformComponent>
           </TransformWrapper>
         </ContextMenuTrigger>
-        <ContextMenuOptions currentPath={currentFilePath} />
+        <ContextMenuOptions
+          currentPath={currentFilePath}
+          isFavorite={favorites.includes(currentFilePath)}
+          onFavoriteSwitch={() => {
+            if (isInFavorites()) {
+              removeFromFavorites();
+            } else {
+              addToFavorites();
+            }
+          }}
+        />
       </ContextMenu>
 
       {isImage && (

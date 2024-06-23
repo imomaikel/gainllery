@@ -73,8 +73,9 @@ const ContextMenuItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Item> & {
     inset?: boolean;
+    preventCloseOnClick?: boolean;
   }
->(({ className, inset, ...props }, ref) => (
+>(({ className, inset, preventCloseOnClick, ...props }, ref) => (
   <ContextMenuPrimitive.Item
     ref={ref}
     className={cn(
@@ -83,6 +84,14 @@ const ContextMenuItem = React.forwardRef<
       className,
     )}
     {...props}
+    onClick={(event) => {
+      if (preventCloseOnClick) {
+        event.preventDefault();
+      }
+      if (props.onClick) {
+        props.onClick(event);
+      }
+    }}
   />
 ));
 ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName;

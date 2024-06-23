@@ -6,9 +6,8 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 
 type TSideMenu = {
-  onFavoriteSwitch: () => void;
   onClose: () => void;
-  isFavorite: boolean;
+
   favoriteDirectories: { name: string; path: string }[];
   moveToDirectory: (path: string, addToFavorites?: boolean) => void;
   addFavoriteDirectory: () => void;
@@ -16,8 +15,6 @@ type TSideMenu = {
 };
 const SideMenu = ({
   onClose,
-  onFavoriteSwitch,
-  isFavorite,
   favoriteDirectories,
   moveToDirectory,
   addFavoriteDirectory,
@@ -51,14 +48,6 @@ const SideMenu = ({
         {/* Menu content */}
         <div className="overflow-y-auto">
           <div className="space-y-3 p-4">
-            <Separator />
-            {/* Add to favorites */}
-            <div className="flex items-center space-x-1">
-              <span className="text-xs font-semibold">{isFavorite ? 'Remove from favorites' : 'Add to favorites'}</span>
-              <Button size="smallIcon" onClick={onFavoriteSwitch} className="shrink-0">
-                <FaHeart />
-              </Button>
-            </div>
             <Separator />
             {/* Add new directory */}
             <div className="flex items-center space-x-1">
