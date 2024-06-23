@@ -3,7 +3,12 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import { FILE_TYPES, getAllFilesRecursively } from './files';
 import handleFiles from './drop-handler';
 import Store from 'electron-store';
-import { join } from 'path';
+import path, { join } from 'path';
+import { promisify } from 'util';
+import fs from 'fs';
+
+const renameFile = promisify(fs.rename);
+const unlinkFile = promisify(fs.unlink);
 
 let mainWindow: BrowserWindow | undefined;
 export const store = new Store();
@@ -23,8 +28,8 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 520,
     height: 520,
-    minHeight: 520,
-    minWidth: 520,
+    minHeight: 560,
+    minWidth: 400,
     show: false,
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -86,16 +91,18 @@ app.whenReady().then(async () => {
     const directories: string[] = [];
     let files: string[] = [];
 
-    for (const path of paths) {
-      const isFile = FILE_TYPES.includes(path.substring(path.lastIndexOf('.') + 1));
+    for (const filePath of paths) {
+      const isFile = FILE_TYPES.includes(filePath.substring(filePath.lastIndexOf('.') + 1));
       if (!isFile) {
-        directories.push(path);
+        directories.push(filePath);
       } else {
-        files.push(path);
+        files.push(filePath);
       }
     }
 
-    const filesInDirectories = (await Promise.all(directories.map((path) => getAllFilesRecursively(path)))).flat();
+    const filesInDirectories = (
+      await Promise.all(directories.map((filePath) => getAllFilesRecursively(filePath)))
+    ).flat();
     files = files.concat(filesInDirectories);
 
     store.set('fetchedFiles', files);
@@ -112,6 +119,55 @@ app.whenReady().then(async () => {
     }
   });
 
+  ipcMain.on('moveFileToDirectory', async (event, ...args) => {
+    try {
+      const moveToPath = args[0] as string;
+      const fileToMovePath = args[1] as string;
+
+      const fileSplit = fileToMovePath.split('/');
+      const fileName = fileSplit[fileSplit.length - 1];
+
+      const newFilePath = path.resolve(moveToPath, fileName);
+
+      if (newFilePath === fileToMovePath) {
+        event.returnValue = false;
+        return;
+      }
+
+      try {
+        await renameFile(fileToMovePath, newFilePath);
+        event.returnValue = newFilePath;
+        return;
+      } catch {
+        const readStream = fs.createReadStream(fileToMovePath);
+        const writeStream = fs.createWriteStream(newFilePath);
+        readStream.pipe(writeStream);
+        readStream
+          .on('end', async () => {
+            await unlinkFile(fileToMovePath);
+            event.returnValue = newFilePath;
+          })
+          .on('error', () => {
+            event.returnValue = false;
+          });
+      }
+    } catch {
+      event.returnValue = false;
+    }
+  });
+
+  ipcMain.on('addFavoriteDirectory', async (event) => {
+    const pick = await dialog.showOpenDialog({
+      title: 'Select one or more directories',
+      properties: ['openDirectory', 'multiSelections'],
+    });
+    if (pick.canceled) {
+      event.returnValue = [];
+      return;
+    }
+    event.returnValue = pick.filePaths;
+  });
+
   ipcMain.on('openDirectory', async () => {
     const pick = await dialog.showOpenDialog({
       title: 'Select one or more directories',
@@ -125,7 +181,7 @@ app.whenReady().then(async () => {
     mainWindow?.webContents.send('fetchingFile');
 
     const paths = pick.filePaths;
-    const filesInDirectories = (await Promise.all(paths.map((path) => getAllFilesRecursively(path)))).flat();
+    const filesInDirectories = (await Promise.all(paths.map((filePath) => getAllFilesRecursively(filePath)))).flat();
 
     store.set('fetchedFiles', filesInDirectories);
 

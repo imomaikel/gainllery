@@ -17,4 +17,7 @@ export type SETTINGS = {
   favorites: {
     valueType: string[];
   };
+  favoriteDirectories: {
+    valueType: { name: string; path: string }[];
+  };
 };

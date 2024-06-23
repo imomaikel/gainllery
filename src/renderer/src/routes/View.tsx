@@ -24,9 +24,10 @@ const View = () => {
 
   const [searchParams] = useSearchParams();
 
-  const [fetchedImages, setFetchedImages] = useState<string[]>(
+  const [fetchedFiles, setFetchedFiles] = useState<string[]>(
     searchParams.get('type') === 'favorites' ? settings.get('favorites', []) : settings.get('fetchedFiles', []),
   );
+  const [favoriteDirectories, setFavoriteDirectories] = useState(settings.get('favoriteDirectories', []));
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(settings.get('sideMenuOpen', false));
   const [favorites, setFavorites] = useState<string[]>(settings.get('favorites', []));
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
@@ -40,17 +41,17 @@ const View = () => {
   const [index, setIndex] = useState(0);
 
   const handleItemTrash = async () => {
-    const itemToTrash = fetchedImages[index];
+    const itemToTrash = fetchedFiles[index];
     const action = await window.electron.ipcRenderer.sendSync('trashFile', itemToTrash);
     if (action === 'success') {
-      const copy = [...fetchedImages];
+      const copy = [...fetchedFiles];
       copy.splice(index, 1);
-      setFetchedImages(copy);
+      setFetchedFiles(copy);
     }
   };
 
   // State
-  const isNext = index + 1 !== fetchedImages.length;
+  const isNext = index + 1 !== fetchedFiles.length;
   const isPrevious = index !== 0;
 
   // Switch files
@@ -115,7 +116,8 @@ const View = () => {
   }, [nextFile, previousFile]);
 
   // TODO
-  const url = `atom://${fetchedImages[index]}`;
+  const currentFilePath = fetchedFiles[index];
+  const url = `atom://${currentFilePath}`;
   const isVideo = url.endsWith('mp4') || url.endsWith('mp3') || url.endsWith('m4v') || url.endsWith('mov');
   const isImage = !isVideo;
 
@@ -163,34 +165,93 @@ const View = () => {
     centerView();
   }, [isSideMenuOpen]);
 
+  const removeCurrentFileFromFetchedStorage = () => {
+    const copy = [...fetchedFiles];
+    const toFilterOut = copy.splice(index, 1);
+    if (searchParams.get('type') !== 'favorites' && toFilterOut.length === 1) {
+      settings.set(
+        'fetchedFiles',
+        settings.get('fetchedFiles', []).filter((filePath) => filePath !== toFilterOut[0]),
+      );
+    }
+    setFetchedFiles(copy);
+  };
+
+  const addToFavorites = (customPath?: string) => {
+    const itemUrl = customPath ? customPath : currentFilePath;
+    setFavorites((prev) => prev.concat(itemUrl));
+    settings.set('favorites', settings.get('favorites', []).concat(itemUrl));
+  };
+  const removeFromFavorites = () => {
+    const itemUrl = currentFilePath;
+    setFavorites((prev) => prev.filter((entryUrl) => entryUrl !== itemUrl));
+    settings.set(
+      'favorites',
+      settings.get('favorites', []).filter((entryUrl) => entryUrl !== itemUrl),
+    );
+
+    if (searchParams.get('type') === 'favorites') {
+      removeCurrentFileFromFetchedStorage();
+    }
+  };
+
+  const isInFavorites = () => {
+    return favorites.includes(currentFilePath);
+  };
+
   return (
     <div className="relative flex h-screen w-screen items-center">
       {isSideMenuOpen ? (
         <div className="w-[150px]">
           <SideMenu
-            isFavorite={favorites.includes(fetchedImages[index])}
+            isFavorite={favorites.includes(currentFilePath)}
             onFavoriteSwitch={() => {
-              const itemUrl = fetchedImages[index];
-              if (favorites.includes(itemUrl)) {
-                setFavorites((prev) => prev.filter((entryUrl) => entryUrl !== itemUrl));
-                settings.set(
-                  'favorites',
-                  settings.get('favorites', []).filter((entryUrl) => entryUrl !== itemUrl),
-                );
-
-                if (searchParams.get('type') === 'favorites') {
-                  const copy = [...fetchedImages];
-                  copy.splice(index, 1);
-                  setFetchedImages(copy);
-                }
+              if (isInFavorites()) {
+                removeFromFavorites();
               } else {
-                setFavorites((prev) => prev.concat(itemUrl));
-                settings.set('favorites', settings.get('favorites', []).concat(itemUrl));
+                addToFavorites();
               }
             }}
             onClose={() => {
               setIsSideMenuOpen(false);
               settings.set('sideMenuOpen', false);
+            }}
+            favoriteDirectories={favoriteDirectories}
+            moveToDirectory={async (path, addItemToFavorites) => {
+              const returnPath = (await window.electron.ipcRenderer.sendSync(
+                'moveFileToDirectory',
+                path,
+                currentFilePath,
+              )) as string | false;
+
+              if (returnPath) {
+                removeCurrentFileFromFetchedStorage();
+                if (addItemToFavorites) {
+                  addToFavorites(returnPath);
+                }
+              }
+            }}
+            addFavoriteDirectory={async () => {
+              const action = (await window.electron.ipcRenderer.sendSync('addFavoriteDirectory')) as string[];
+
+              const currentPaths = favoriteDirectories.flatMap((dir) => dir.path);
+              const dirsToAdd: { name: string; path: string }[] = [];
+              for (const newDir of action) {
+                if (currentPaths.includes(newDir)) continue;
+                const splitPath = newDir.split('/');
+                const dirName = splitPath[splitPath.length - 1];
+                dirsToAdd.push({ name: dirName, path: newDir });
+              }
+
+              setFavoriteDirectories((prev) => prev.concat(dirsToAdd));
+              settings.set('favoriteDirectories', settings.get('favoriteDirectories', []).concat(dirsToAdd));
+            }}
+            removeFavoriteDirectory={(dirPath) => {
+              setFavoriteDirectories((prev) => prev.filter(({ path }) => path !== dirPath));
+              settings.set(
+                'favoriteDirectories',
+                settings.get('favoriteDirectories', []).filter(({ path }) => path !== dirPath),
+              );
             }}
           />
         </div>
