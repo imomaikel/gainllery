@@ -1,5 +1,5 @@
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import { ElementRef, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ElementRef, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
 import ContextMenuOptions from '@/components/ContextMenuOptions';
@@ -14,8 +14,6 @@ import { cn } from '@/lib/utils';
 const View = () => {
   const settings = useSettings();
 
-  const fetchedImages = useMemo(() => settings.get('fetchedFiles', []), []);
-
   const centerView = useCallback(
     debounce(() => {
       transformComponentRef.current?.centerView(1, 1);
@@ -23,6 +21,7 @@ const View = () => {
     [],
   );
 
+  const [fetchedImages, setFetchedImages] = useState<string[]>(settings.get('fetchedFiles', []));
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(settings.get('sideMenuOpen', false));
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const videoRef = useRef<ElementRef<'video'>>(null);
@@ -33,6 +32,16 @@ const View = () => {
   const [scope, animate] = useAnimate<ElementRef<'div'>>();
 
   const [index, setIndex] = useState(0);
+
+  const handleItemTrash = async () => {
+    const itemToTrash = fetchedImages[index];
+    const action = await window.electron.ipcRenderer.sendSync('trashFile', itemToTrash);
+    if (action === 'success') {
+      const copy = [...fetchedImages];
+      copy.splice(index, 1);
+      setFetchedImages(copy);
+    }
+  };
 
   // State
   const isNext = index + 1 !== fetchedImages.length;
@@ -210,6 +219,7 @@ const View = () => {
           onPrevious={() => previousFile()}
           rotateMedia={(direction: 'LEFT' | 'RIGHT') => rotateMedia(direction)}
           ref={transformComponentRef}
+          onItemTrash={handleItemTrash}
         />
       )}
       {isVideo && (
@@ -221,6 +231,7 @@ const View = () => {
           onNext={() => nextFile()}
           onPrevious={() => previousFile()}
           index={index}
+          onItemTrash={handleItemTrash}
         />
       )}
     </div>

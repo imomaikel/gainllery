@@ -1,4 +1,4 @@
-import { FaChevronLeft, FaChevronRight, FaPause, FaPlay, FaRotateLeft, FaRotateRight } from 'react-icons/fa6';
+import { FaChevronLeft, FaChevronRight, FaPause, FaPlay, FaRotateLeft, FaRotateRight, FaTrash } from 'react-icons/fa6';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TiZoomInOutline, TiZoomOutOutline } from 'react-icons/ti';
 import { MdOutlineZoomOutMap } from 'react-icons/md';
@@ -42,6 +42,7 @@ type TBoth = {
   nextSlide: () => void;
   prevSlide: () => void;
   hideMenu: () => void;
+  handleItemTrash: () => void;
 
   isMenuVisible: boolean;
   isPrev: boolean;
@@ -57,6 +58,7 @@ const FileControls = ({
   prevSlide,
   hideMenu,
   isMenuVisible,
+  handleItemTrash,
 }: TFileControls) => {
   const { fileType } = props;
 
@@ -128,6 +130,10 @@ const FileControls = ({
             <Link to="/">
               <IoHome className="h-6 w-6" />
             </Link>
+          </Button>
+
+          <Button size="icon" onClick={handleItemTrash}>
+            <FaTrash className="h-6 w-6" />
           </Button>
 
           <Popover>

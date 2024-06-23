@@ -8,10 +8,11 @@ type TImageControls = {
   onNext: () => void;
   onPrevious: () => void;
   rotateMedia: (direction: 'LEFT' | 'RIGHT') => void;
+  onItemTrash: () => void;
 };
 
 const ImageControls = React.forwardRef<ReactZoomPanPinchRef, TImageControls>(
-  ({ isNext, isPrevious, onNext, onPrevious, rotateMedia }, _ref) => {
+  ({ isNext, isPrevious, onNext, onPrevious, rotateMedia, onItemTrash }, _ref) => {
     const ref = _ref as RefObject<ReactZoomPanPinchRef>;
     const [menuVisible, setMenuVisible] = useState(true);
 
@@ -28,6 +29,7 @@ const ImageControls = React.forwardRef<ReactZoomPanPinchRef, TImageControls>(
         prevSlide={onPrevious}
         hideMenu={() => setMenuVisible(false)}
         isMenuVisible={menuVisible}
+        handleItemTrash={onItemTrash}
         props={{
           fileType: 'image',
           onCenter: center,

@@ -9,10 +9,11 @@ type TVideoControls = {
   onNext: () => void;
   onPrevious: () => void;
   index: number;
+  onItemTrash: () => void;
   rotateMedia: (direction: 'LEFT' | 'RIGHT') => void;
 };
 const VideoControls = React.forwardRef<ElementRef<'video'>, TVideoControls>(
-  ({ isNext, isPrevious, onNext, onPrevious, index, rotateMedia }, _ref) => {
+  ({ isNext, isPrevious, onNext, onPrevious, index, rotateMedia, onItemTrash }, _ref) => {
     const ref = _ref as RefObject<ElementRef<'video'>>;
 
     const settings = useSettings();
@@ -122,6 +123,7 @@ const VideoControls = React.forwardRef<ElementRef<'video'>, TVideoControls>(
         prevSlide={onPrevious}
         hideMenu={() => setMenuVisible(false)}
         isMenuVisible={menuVisible}
+        handleItemTrash={onItemTrash}
         props={{
           fileType: 'video',
           onAutoPlay: onAutoPlay,

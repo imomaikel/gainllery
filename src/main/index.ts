@@ -103,6 +103,15 @@ app.whenReady().then(async () => {
     mainWindow?.webContents.send('filesFetched');
   });
 
+  ipcMain.on('trashFile', async (event, ...args) => {
+    try {
+      await shell.trashItem(args[0]);
+      event.returnValue = 'success';
+    } catch {
+      event.returnValue = 'error';
+    }
+  });
+
   ipcMain.on('openDirectory', async () => {
     const pick = await dialog.showOpenDialog({
       title: 'Select one or more directories',
