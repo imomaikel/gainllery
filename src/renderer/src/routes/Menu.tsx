@@ -17,7 +17,7 @@ const Menu = () => {
 
   const openFiles = () => window.electron.ipcRenderer.send('openFile');
   const openDirectories = () => window.electron.ipcRenderer.send('openDirectory');
-  const openFavorites = () => navigate('/view?type=favorites');
+  const openFavorites = () => navigate('/browse?type=favorites');
 
   useEffect(() => {
     window.electron.ipcRenderer.on('filesFetched', () => {
