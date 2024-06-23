@@ -1,10 +1,10 @@
 import galleryIcon from '../../../../resources/gallery.png?asset';
+import LoadingScreen from '@/components/LoadingScreen';
 import { Separator } from '@/components/ui/separator';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useSettings } from '@/hooks/settings';
-import { HashLoader } from 'react-spinners';
 
 const Menu = () => {
   const settings = useSettings();
@@ -51,18 +51,7 @@ const Menu = () => {
       <Separator className="w-3/5" />
       <div className="flex w-1/2 flex-col space-y-2">
         {isLoading ? (
-          <div className="mt-4 flex items-center justify-center space-x-6">
-            <HashLoader color="#6d28d9" speedMultiplier={1.25} />
-            <div className="flex flex-col">
-              <p className="text-lg font-bold">Please wait...</p>
-              {showExtra && (
-                <p className="text-sm text-muted-foreground">
-                  There are a lot of files
-                  <br /> It can take a while
-                </p>
-              )}
-            </div>
-          </div>
+          <LoadingScreen showExtraText={showExtra} />
         ) : (
           <>
             {hasPrevious && (

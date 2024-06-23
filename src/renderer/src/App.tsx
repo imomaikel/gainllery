@@ -3,6 +3,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import DropHandler from './components/DropHandler';
 import Settings from './routes/Settings';
 import { DndProvider } from 'react-dnd';
+import Browse from './routes/Browse';
 import Menu from './routes/Menu';
 import View from './routes/View';
 import { Toaster } from 'sonner';
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: '/settings',
         element: <Settings />,
+      },
+      {
+        path: '/browse',
+        element: <Browse />,
       },
     ],
   },

@@ -3,11 +3,11 @@ import { ElementRef, RefObject, useCallback, useEffect, useRef, useState } from 
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { ValueAnimationTransition, useAnimate } from 'framer-motion';
 import ContextMenuOptions from '@/components/ContextMenuOptions';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SideMenuButton from '@/components/SideMenuButton';
 import BreadcrumbPath from '@/components/BreadcrumbPath';
 import VideoControls from '@/components/VideoControls';
 import ImageControls from '@/components/ImageControls';
-import { useSearchParams } from 'react-router-dom';
 import { useSettings } from '@/hooks/settings';
 import { useEventListener } from 'usehooks-ts';
 import SideMenu from '@/components/SideMenu';
@@ -38,6 +38,7 @@ const View = () => {
   const imageRef = useRef<ElementRef<'img'>>(null);
   const whileChange = useRef(false);
   const rotate = useRef('0');
+  const navigate = useNavigate();
   const [whileRenaming, setWhileRenaming] = useState(false);
 
   const [scope, animate] = useAnimate<ElementRef<'div'>>();
@@ -355,13 +356,16 @@ const View = () => {
         />
       )}
       <BreadcrumbPath
-        currentPath={currentFilePath}
-        selectDirectory={(path) => {
-          console.log('view', path);
+        props={{
+          allowRename: true,
+          setWhileRenaming,
+          whileRenaming,
+          currentPath: currentFilePath,
+          selectDirectory: (path) => {
+            navigate(`/browse?path=${path}`);
+          },
+          onRename: handleFileRename,
         }}
-        onRename={handleFileRename}
-        setWhileRenaming={setWhileRenaming}
-        whileRenaming={whileRenaming}
       />
     </div>
   );

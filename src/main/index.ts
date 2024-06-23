@@ -1,6 +1,6 @@
+import { FILE_TYPES, getAllFilesInDirectory, getAllFilesRecursively } from './files';
 import { BrowserWindow, app, dialog, ipcMain, protocol, shell } from 'electron';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
-import { FILE_TYPES, getAllFilesRecursively } from './files';
 import handleFiles from './drop-handler';
 import Store from 'electron-store';
 import path, { join } from 'path';
@@ -69,6 +69,16 @@ app.whenReady().then(async () => {
 
   // Menu buttons
 
+  ipcMain.on('browseDirectory', async (event, ...args) => {
+    try {
+      const files = await getAllFilesInDirectory(args[0]);
+
+      event.returnValue = files;
+    } catch {
+      event.returnValue = false;
+    }
+  });
+
   ipcMain.on('selectCurrentDirectory', (_, ...args) => {
     shell.openPath(args[0]);
   });
@@ -76,25 +86,8 @@ app.whenReady().then(async () => {
     shell.showItemInFolder(args[0]);
   });
 
-  ipcMain.on('openFile', async () => {
-    const pick = await dialog.showOpenDialog({
-      filters: [
-        {
-          name: 'Media',
-          extensions: FILE_TYPES,
-        },
-      ],
-      title: 'Select one or more files',
-      properties: ['multiSelections', 'openFile'],
-    });
-    if (pick.canceled) {
-      mainWindow?.webContents.send('fetchingCancelled');
-      return;
-    }
-
+  const fetchFilesAndSendBroadcast = async (paths: string[]) => {
     mainWindow?.webContents.send('fetchingFile');
-
-    const paths = pick.filePaths;
 
     const directories: string[] = [];
     let files: string[] = [];
@@ -116,6 +109,25 @@ app.whenReady().then(async () => {
     store.set('fetchedFiles', files);
 
     mainWindow?.webContents.send('filesFetched');
+  };
+
+  ipcMain.on('openFile', async () => {
+    const pick = await dialog.showOpenDialog({
+      filters: [
+        {
+          name: 'Media',
+          extensions: FILE_TYPES,
+        },
+      ],
+      title: 'Select one or more files',
+      properties: ['multiSelections', 'openFile'],
+    });
+    if (pick.canceled) {
+      mainWindow?.webContents.send('fetchingCancelled');
+      return;
+    }
+
+    fetchFilesAndSendBroadcast(pick.filePaths);
   });
 
   ipcMain.on('trashFile', async (event, ...args) => {
@@ -204,6 +216,23 @@ app.whenReady().then(async () => {
     event.returnValue = pick.filePaths;
   });
 
+  const fetchFilesInDirectoryAndSendBroadcast = async (paths: string[]) => {
+    mainWindow?.webContents.send('fetchingFile');
+
+    const filesInDirectories = (await Promise.all(paths.map((filePath) => getAllFilesRecursively(filePath)))).flat();
+
+    store.set('fetchedFiles', filesInDirectories);
+
+    mainWindow?.webContents.send('filesFetched');
+  };
+
+  ipcMain.on('openSelectedFile', (_, ...args) => {
+    fetchFilesAndSendBroadcast(args);
+  });
+  ipcMain.on('openSelectedDirectory', (_, ...args) => {
+    fetchFilesInDirectoryAndSendBroadcast(args);
+  });
+
   ipcMain.on('openDirectory', async () => {
     const pick = await dialog.showOpenDialog({
       title: 'Select one or more directories',
@@ -214,14 +243,7 @@ app.whenReady().then(async () => {
       return;
     }
 
-    mainWindow?.webContents.send('fetchingFile');
-
-    const paths = pick.filePaths;
-    const filesInDirectories = (await Promise.all(paths.map((filePath) => getAllFilesRecursively(filePath)))).flat();
-
-    store.set('fetchedFiles', filesInDirectories);
-
-    mainWindow?.webContents.send('filesFetched');
+    fetchFilesInDirectoryAndSendBroadcast(pick.filePaths);
   });
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');

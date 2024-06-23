@@ -28,3 +28,25 @@ export const getAllFilesRecursively = async (path: string): Promise<string[]> =>
 
   return files;
 };
+
+export const getAllFilesInDirectory = async (path: string) => {
+  const files = await readdir(path, { withFileTypes: true });
+
+  const fileList = files
+    .map((dirent) => {
+      if (dirent.isDirectory()) {
+        return { type: 'directory', path: dirent.name };
+      } else {
+        const filePath = resolve(dirent.path, dirent.name);
+        const fileName = dirent.name.substring(dirent.name.lastIndexOf('.') + 1) as string;
+        if (FILE_TYPES.includes(fileName.toLowerCase())) {
+          return { type: 'file', path: filePath };
+        }
+        return null;
+      }
+    })
+    .filter((exist) => exist)
+    .sort((a, b) => a!.type.localeCompare(b!.type));
+
+  return fileList;
+};

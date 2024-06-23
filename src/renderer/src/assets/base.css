@@ -69,3 +69,9 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply rounded-xl bg-primary;
 }
+
+.customGrid {
+  @apply grid w-full justify-center gap-4;
+
+  grid-template-columns: repeat(auto-fit, minmax(0, 144px));
+}

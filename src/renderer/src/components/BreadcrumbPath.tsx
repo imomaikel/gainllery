@@ -30,23 +30,28 @@ type TBreadcrumbData =
       path1: string;
       path2: string | undefined;
       path3: string | undefined;
-    };
+    }
+  | null;
 
-type TBreadcrumbPath = {
-  currentPath: string;
+type TBreadcrumbWithInput = {
+  allowRename: true;
+  currentPath: string | undefined;
   selectDirectory: (path: string) => void;
   onRename: (path: string, newName: string) => void;
   whileRenaming: boolean;
   setWhileRenaming: (newState: boolean) => void;
 };
-const BreadcrumbPath = ({
-  currentPath,
-  selectDirectory,
-  onRename,
-  whileRenaming,
-  setWhileRenaming,
-}: TBreadcrumbPath) => {
+type TBreadcrumbWithoutInput = {
+  allowRename: false;
+  currentPath: string | undefined;
+  selectDirectory: (path: string) => void;
+};
+type TBreadcrumbPath = { props: TBreadcrumbWithInput | TBreadcrumbWithoutInput };
+const BreadcrumbPath = ({ props }: TBreadcrumbPath) => {
+  const { currentPath, selectDirectory, allowRename } = props;
+
   const data: TBreadcrumbData = useMemo(() => {
+    if (!currentPath) return null;
     const pathList = currentPath.split('/').filter((path) => path.length);
 
     if (pathList.length >= 4) {
@@ -74,6 +79,8 @@ const BreadcrumbPath = ({
     selectDirectory(path);
   };
 
+  if (!data) return null;
+
   return (
     <div className="fixed top-0 h-5 w-screen">
       <div className="flex items-center justify-center">
@@ -88,26 +95,46 @@ const BreadcrumbPath = ({
                 {data.path2 && (
                   <>
                     <BreadcrumbSeparator />
-                    <BreadcrumbItem>
+                    {data.path3 ? (
                       <BreadcrumbLink asChild>
                         <div role="button" aria-label="open directory" onClick={() => handlePathClick(data.path2)}>
-                          {formatPath(data.path2, data.path3 ? false : true)}
+                          {formatPath(data.path2)}
                         </div>
                       </BreadcrumbLink>
-                    </BreadcrumbItem>
+                    ) : allowRename ? (
+                      <BreadcrumbItem>
+                        <BreadcrumbInput
+                          defaultValue={data.path2}
+                          onRename={(newName) => {
+                            props.onRename(data.path2!, newName);
+                          }}
+                          setWhileRenaming={props.setWhileRenaming}
+                          whileRenaming={props.whileRenaming}
+                        />
+                      </BreadcrumbItem>
+                    ) : (
+                      <BreadcrumbPage>{formatPath(data.path2)}</BreadcrumbPage>
+                    )}
                   </>
                 )}
 
                 {data.path3 && (
                   <>
                     <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <BreadcrumbLink asChild>
-                        <div role="button" aria-label="open directory" onClick={() => handlePathClick(data.path3)}>
-                          {formatPath(data.path3, true)}
-                        </div>
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
+                    {allowRename ? (
+                      <BreadcrumbItem>
+                        <BreadcrumbInput
+                          defaultValue={data.path3}
+                          onRename={(newName) => {
+                            props.onRename(data.path3!, newName);
+                          }}
+                          setWhileRenaming={props.setWhileRenaming}
+                          whileRenaming={props.whileRenaming}
+                        />
+                      </BreadcrumbItem>
+                    ) : (
+                      <BreadcrumbPage>{formatPath(data.path3)}</BreadcrumbPage>
+                    )}
                   </>
                 )}
               </>
@@ -141,16 +168,20 @@ const BreadcrumbPath = ({
 
                 <BreadcrumbSeparator />
 
-                <BreadcrumbItem>
-                  <BreadcrumbInput
-                    defaultValue={data.lastPath}
-                    onRename={(newName) => {
-                      onRename(data.lastPath, newName);
-                    }}
-                    setWhileRenaming={setWhileRenaming}
-                    whileRenaming={whileRenaming}
-                  />
-                </BreadcrumbItem>
+                {allowRename ? (
+                  <BreadcrumbItem>
+                    <BreadcrumbInput
+                      defaultValue={data.lastPath}
+                      onRename={(newName) => {
+                        props.onRename(data.lastPath, newName);
+                      }}
+                      setWhileRenaming={props.setWhileRenaming}
+                      whileRenaming={props.whileRenaming}
+                    />
+                  </BreadcrumbItem>
+                ) : (
+                  <BreadcrumbPage>{formatPath(data.lastPath, true)}</BreadcrumbPage>
+                )}
               </>
             )}
           </BreadcrumbList>
