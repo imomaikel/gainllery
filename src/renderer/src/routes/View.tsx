@@ -326,7 +326,7 @@ const View = () => {
             </TransformComponent>
           </TransformWrapper>
         </ContextMenuTrigger>
-        <ContextMenuOptions />
+        <ContextMenuOptions currentPath={currentFilePath} />
       </ContextMenu>
 
       {isImage && (

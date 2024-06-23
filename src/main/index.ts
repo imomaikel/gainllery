@@ -68,6 +68,11 @@ app.whenReady().then(async () => {
   });
 
   // Menu buttons
+
+  ipcMain.on('selectCurrentDirectory', (_, ...args) => {
+    shell.openPath(args[0]);
+  });
+
   ipcMain.on('openFile', async () => {
     const pick = await dialog.showOpenDialog({
       filters: [

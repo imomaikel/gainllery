@@ -1,9 +1,22 @@
 import { ContextMenuContent, ContextMenuItem } from './ui/context-menu';
 
-const ContextMenuOptions = () => {
+type TContextMenuOptions = {
+  currentPath: string;
+};
+const ContextMenuOptions = ({ currentPath }: TContextMenuOptions) => {
+  const sendToIpcRenderer = (channel: string, ...args: string[]) => {
+    window.electron.ipcRenderer.send(channel, ...args);
+  };
+
   return (
     <ContextMenuContent>
-      <ContextMenuItem>TODO</ContextMenuItem>
+      <ContextMenuItem
+        onClick={() =>
+          sendToIpcRenderer('selectCurrentDirectory', currentPath.substring(0, currentPath.lastIndexOf('/')))
+        }
+      >
+        Select Directory
+      </ContextMenuItem>
     </ContextMenuContent>
   );
 };
