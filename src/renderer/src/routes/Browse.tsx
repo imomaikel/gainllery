@@ -61,6 +61,11 @@ const Browse = () => {
       const showExtraMessageId = setInterval(() => setShowExtra(true), 6_000);
       intervalId.current = showExtraMessageId;
     });
+
+    return () => {
+      window.electron.ipcRenderer.removeAllListeners('filesFetched');
+      window.electron.ipcRenderer.removeAllListeners('fetchingFile');
+    };
   }, [path, showFavorites]);
 
   const removeFromFavorites = (filePath: string) => {
@@ -84,8 +89,8 @@ const Browse = () => {
 
   const addToFavorites = (filePath: string) => {
     settings.set('favorites', settings.get('favorites', []).concat(filePath));
-    setFiles((files) =>
-      files.map((entry) => {
+    setFiles((prev) =>
+      prev.map((entry) => {
         if (entry.path !== filePath) return entry;
         return { ...entry, isFavorite: true };
       }),

@@ -55,7 +55,7 @@ function createWindow(): void {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/' });
   }
 }
 
@@ -63,6 +63,12 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+  if (app.isPackaged) {
+    process.argv.unshift();
+  }
+  // TODO
+  // const startParameters = process.argv.slice(2).filter((arg) => !arg.includes('--no-sandbox'));
+
   ipcMain.on('filesToFetch', async (event) => {
     event.returnValue = await handleFiles();
   });
@@ -108,7 +114,7 @@ app.whenReady().then(async () => {
 
     store.set('fetchedFiles', files);
 
-    mainWindow?.webContents.send('filesFetched');
+    mainWindow?.webContents.send('filesFetched', files.length);
   };
 
   ipcMain.on('openFile', async () => {
@@ -223,7 +229,7 @@ app.whenReady().then(async () => {
 
     store.set('fetchedFiles', filesInDirectories);
 
-    mainWindow?.webContents.send('filesFetched');
+    mainWindow?.webContents.send('filesFetched', filesInDirectories.length);
   };
 
   ipcMain.on('openSelectedFile', (_, ...args) => {
@@ -259,7 +265,7 @@ app.whenReady().then(async () => {
     mainWindow?.webContents.send('directoryReadyToBrowse', pick.filePaths[0]);
   });
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron');
+  electronApp.setAppUserModelId('com.gainllery');
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useSettings } from '@/hooks/settings';
+import { toast } from 'sonner';
 
 const Menu = () => {
   const settings = useSettings();
@@ -21,9 +22,13 @@ const Menu = () => {
   const selectDirectory = () => window.electron.ipcRenderer.send('selectDirectory');
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('filesFetched', () => {
+    window.electron.ipcRenderer.on('filesFetched', (_, ...args) => {
       setIsLoading(false);
-      navigate('/view');
+      if (args[0] >= 1) {
+        navigate('/view');
+      } else {
+        toast.error('The directory is empty!');
+      }
     });
 
     window.electron.ipcRenderer.on('fetchingFile', () => {
@@ -39,6 +44,9 @@ const Menu = () => {
 
     return () => {
       if (intervalId.current) clearInterval(intervalId.current);
+      window.electron.ipcRenderer.removeAllListeners('filesFetched');
+      window.electron.ipcRenderer.removeAllListeners('fetchingFile');
+      window.electron.ipcRenderer.removeAllListeners('directoryReadyToBrowse');
     };
   }, []);
 

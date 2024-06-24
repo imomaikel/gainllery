@@ -1,4 +1,4 @@
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { RouterProvider, createHashRouter } from 'react-router-dom';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import DropHandler from './components/DropHandler';
 import Settings from './routes/Settings';
@@ -8,7 +8,7 @@ import Menu from './routes/Menu';
 import View from './routes/View';
 import { Toaster } from 'sonner';
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     element: <DropHandler />,
     children: [

@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.gainllery.app
 productName: gainllery
 directories:
   buildResources: build
@@ -30,9 +30,7 @@ dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
   target:
-    - AppImage
     - snap
-    - deb
   maintainer: electronjs.org
   category: Utility
 appImage:
@@ -41,3 +39,60 @@ npmRebuild: false
 publish:
   provider: generic
   url: https://example.com/auto-updates
+fileAssociations:
+  - ext: png
+    name: PNG Image
+    role: Viewer
+    description: Open PNG images with Gainllery
+  - ext: jpg
+    name: JPEG Image
+    role: Viewer
+    description: Open JPEG images with Gainllery
+  - ext: jpeg
+    name: JPEG Image
+    role: Viewer
+    description: Open JPEG images with Gainllery
+  - ext: gif
+    name: GIF Image
+    role: Viewer
+    description: Open GIF images with Gainllery
+  - ext: bmp
+    name: BMP Image
+    role: Viewer
+    description: Open BMP images with Gainllery
+  - ext: webp
+    name: WEBP Image
+    role: Viewer
+    description: Open WEBP images with Gainllery
+  - ext: svg
+    name: SVG Image
+    role: Viewer
+    description: Open SVG images with Gainllery
+  - ext: png
+    name: PNG Image
+    role: Viewer
+    description: Open PNG images with Gainllery
+  - ext: jpg
+    name: JPEG Image
+    role: Viewer
+    description: Open JPEG images with Gainllery
+  - ext: jpeg
+    name: JPEG Image
+    role: Viewer
+    description: Open JPEG images with Gainllery
+  - ext: gif
+    name: GIF Image
+    role: Viewer
+    description: Open GIF images with Gainllery
+  - ext: bmp
+    name: BMP Image
+    role: Viewer
+    description: Open BMP images with Gainllery
+  - ext: webp
+    name: WEBP Image
+    role: Viewer
+    description: Open WEBP images with Gainllery
+  - ext: svg
+    name: SVG Image
+    role: Viewer
+    description: Open SVG images with Gainllery
