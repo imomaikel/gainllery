@@ -120,6 +120,8 @@ const View = () => {
       nextFile();
     } else if (event.key === 'ArrowLeft') {
       previousFile();
+    } else if (event.key === 'Delete') {
+      handleItemTrash();
     }
   });
 
