@@ -53,6 +53,7 @@ const Browse = () => {
         intervalId.current = null;
       }
       setIsLoading(false);
+      navigate('/view');
     });
 
     window.electron.ipcRenderer.on('fetchingFile', () => {

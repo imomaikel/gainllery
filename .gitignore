@@ -6,3 +6,4 @@ out
 /build
 /out
 electron.vite.config.*.mjs
+/backups
