@@ -9,7 +9,7 @@ const router = createHashRouter([
   },
 ]);
 
-const App = (): JSX.Element => {
+const App = () => {
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-hidden">
       <ThemeProvider>
