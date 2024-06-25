@@ -27,7 +27,7 @@ type TFileContextProvider = {
   children: React.ReactNode;
 };
 export const FileContext = ({ children }: TFileContextProvider) => {
-  const [files, setFiles] = useState<string[]>(window.store.get('recentPaths', []));
+  const [files, setFiles] = useState<string[]>(() => window.store.get('recentPaths', []));
   const [isLoading, setIsLoading] = useState(false);
   const [index, setIndex] = useState(0);
   const navigate = useNavigate();
