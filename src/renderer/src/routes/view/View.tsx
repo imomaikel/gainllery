@@ -1,24 +1,32 @@
-import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { useFileContext } from '@/hooks/useFileContext';
-import { cn } from '@/lib/utils';
-import { AnimatePresence } from 'framer-motion';
-import { useRef, useState } from 'react';
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import { useEventListener } from 'usehooks-ts';
+import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import FileContextMenu from './components/FileContextMenu';
+import { useFileContext } from '@/hooks/useFileContext';
+import { AnimatePresence } from 'framer-motion';
+import { useEventListener } from 'usehooks-ts';
+import { useNavigate } from 'react-router-dom';
 import SideMenu from './components/SideMenu';
+import { useRef, useState } from 'react';
 import TopBar from './components/TopBar';
+import { cn } from '@/lib/utils';
 
 const View = () => {
   const { selectedFile, nextFile, isPrevious, isNext, previousFile, isVideo } = useFileContext();
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [isTopBarOpen, setIsTopBarOpen] = useState(false);
+  const navigate = useNavigate();
 
   const fixViewerSize = (timeout: number = 0) =>
     setTimeout(() => transformComponentRef.current?.centerView(1, timeout), timeout);
 
   useEventListener('resize', () => fixViewerSize());
+
+  useEventListener('keydown', ({ key }) => {
+    if (key === 'ArrowRight' && isNext) return nextFile();
+    if (key === 'ArrowLeft' && isPrevious) return previousFile();
+    if (key === 'Escape') return navigate('/');
+  });
 
   return (
     <div className="relative flex flex-col">
