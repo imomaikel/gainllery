@@ -1,5 +1,6 @@
 import { RouterProvider, createHashRouter } from 'react-router-dom';
-import Menu from './routes/Menu';
+import { ThemeProvider } from './components/ThemeProvider';
+import Menu from './routes/menu/Menu';
 
 const router = createHashRouter([
   {
@@ -11,7 +12,9 @@ const router = createHashRouter([
 const App = (): JSX.Element => {
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-hidden">
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </div>
   );
 };
