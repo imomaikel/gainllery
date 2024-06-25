@@ -19,9 +19,7 @@ export const FileContext = ({ children }: TFileContextProvider) => {
       setIsLoading(false);
     });
     window.ipc.on('startFilesFetch', () => setIsLoading(true));
-    return () => {
-      window.ipc.removeListener(['filesFetched', 'startFilesFetch']);
-    };
+    return () => window.ipc.removeListener(['filesFetched', 'startFilesFetch']);
   }, []);
 
   return <FileContextProvider.Provider value={{ files }}>{children}</FileContextProvider.Provider>;

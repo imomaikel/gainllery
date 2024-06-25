@@ -1,7 +1,8 @@
 import { IPCCallArguments, IPCCallCallbackReturn, IPCCallKey, IPCReceiveArguments, IPCReceiverKey } from './types';
 import { StoreSchema, StoreSchemaKey } from '../store/types';
-import { BrowserWindow, ipcMain } from 'electron';
+import { BrowserWindow, dialog, ipcMain } from 'electron';
 import { storageGet, storageSet } from '../store';
+import { getAllFilesRecursively } from '../files';
 
 // Listen to an event from the renderer
 const handleChannel = <T extends IPCCallKey>(
@@ -36,4 +37,24 @@ export const registerIPCMainListeners = (window: BrowserWindow) => {
   const broadcastEvent = <T extends IPCReceiverKey>(channel: T, ...args: IPCReceiveArguments<T>) => {
     window.webContents.send(channel, ...args);
   };
+
+  // Open directory picker dialog and fetch files
+  handleChannel('openDirectory', async () => {
+    const pick = await dialog.showOpenDialog({
+      title: 'Select one or more directories',
+      properties: ['openDirectory', 'multiSelections'],
+    });
+    if (pick.canceled) {
+      broadcastEvent('infoToast', 'Pick canceled!');
+      return;
+    }
+
+    broadcastEvent('startFilesFetch');
+    const filesInDirectories = (
+      await Promise.all(pick.filePaths.map((filePath) => getAllFilesRecursively(filePath)))
+    ).flat();
+    storageSet('recentPaths', filesInDirectories);
+
+    broadcastEvent('filesFetched', { paths: filesInDirectories });
+  });
 };

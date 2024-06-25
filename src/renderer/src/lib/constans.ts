@@ -22,6 +22,7 @@ export const MENU_TABS: {
   {
     label: 'Open directory',
     Icon: FaFolderOpen,
+    onClick: () => window.ipc.send('openDirectory'),
   },
   {
     label: 'Browse directory',

@@ -1,8 +1,10 @@
 import { RouterProvider, createHashRouter } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
 import { FileContext } from './components/FileContext';
+import { Toaster, toast } from 'sonner';
 import Menu from './routes/menu/Menu';
 import View from './routes/view/View';
+import { useEffect } from 'react';
 
 const router = createHashRouter([
   {
@@ -16,6 +18,12 @@ const router = createHashRouter([
 ]);
 
 const App = () => {
+  useEffect(() => {
+    window.ipc.on('infoToast', (_, message) => toast.info(message));
+
+    return () => window.ipc.removeListener('infoToast');
+  }, []);
+
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-hidden">
       <FileContext>
@@ -23,6 +31,7 @@ const App = () => {
           <RouterProvider router={router} />
         </ThemeProvider>
       </FileContext>
+      <Toaster position="top-left" toastOptions={{ style: { maxWidth: '480px' } }} />
     </div>
   );
 };

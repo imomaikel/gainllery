@@ -1,5 +1,5 @@
 export type IPCCalls = {
-  fetchPath: {
+  openDirectory: {
     arguments: never;
     returns: never;
   };
@@ -17,6 +17,7 @@ export type IPCReceivers = {
     paths: string[];
   };
   startFilesFetch: void;
+  infoToast: string;
 };
 export type IPCReceiverKey = keyof IPCReceivers;
 export type IPCReceiveArguments<T extends IPCReceiverKey> = IPCReceivers[T] extends void
