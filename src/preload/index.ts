@@ -11,8 +11,12 @@ const ipc: CustomIPC = {
   sendSync(channel, ...args) {
     return ipcRenderer.sendSync(channel, ...args);
   },
-  removeListener(channel) {
-    ipcRenderer.removeAllListeners(channel);
+  removeListener(channelList) {
+    if (Array.isArray(channelList)) {
+      channelList.forEach((channel) => ipcRenderer.removeAllListeners(channel));
+    } else {
+      ipcRenderer.removeAllListeners(channelList);
+    }
   },
 };
 

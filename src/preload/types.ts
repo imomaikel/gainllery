@@ -15,7 +15,7 @@ export type CustomIPC = {
   ) => void;
   send: <T extends IPCCallKey>(channel: T, ...args: IPCCallArguments<T>) => void;
   sendSync: <T extends IPCCallKey>(channel: T, ...args: IPCCallArguments<T>) => IPCCallCallbackReturn<T>;
-  removeListener: <T extends IPCReceiverKey>(channel: T) => void;
+  removeListener: <T extends IPCReceiverKey>(channel: T | T[]) => void;
 };
 
 export type CustomStore = {

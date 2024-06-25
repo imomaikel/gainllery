@@ -13,10 +13,10 @@ export type IPCCallCallbackReturn<T extends IPCCallKey> = IPCCalls[T]['returns']
   : IPCCalls[T]['returns'];
 
 export type IPCReceivers = {
-  fetchedFile: void;
-  fetchedFiles: {
-    fileCount: number;
+  filesFetched: {
+    paths: string[];
   };
+  startFilesFetch: void;
 };
 export type IPCReceiverKey = keyof IPCReceivers;
 export type IPCReceiveArguments<T extends IPCReceiverKey> = IPCReceivers[T] extends void
