@@ -1,9 +1,6 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import { BrowserWindow, app, protocol, shell } from 'electron';
-import Store from 'electron-store';
 import path from 'path';
-
-export const store = new Store();
 
 function createWindow(): void {
   // Create the browser window.
