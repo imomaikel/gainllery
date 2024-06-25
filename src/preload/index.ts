@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { CustomIPC } from './types';
+import { CustomIPC, CustomStore } from './types';
 
 const ipc: CustomIPC = {
   on(channel, cb) {
@@ -16,16 +16,28 @@ const ipc: CustomIPC = {
   },
 };
 
+const store: CustomStore = {
+  get(key, overwriteIfEmpty) {
+    return ipcRenderer.sendSync('storeGet', key, overwriteIfEmpty);
+  },
+  set(key, value) {
+    ipcRenderer.send('storeSet', key, value);
+  },
+};
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('ipc', ipc);
+    contextBridge.exposeInMainWorld('store', store);
   } catch (error) {
     console.error(error);
   }
 } else {
   // @ts-expect-error (define in dts)
   window.ipc = ipc;
+  // @ts-expect-error (define in dts)
+  window.store = store;
 }

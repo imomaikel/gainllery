@@ -13,7 +13,6 @@ export const storageGet = <T extends StoreSchemaKey>(key: T, overwriteIfEmpty: S
   return overwriteIfEmpty;
 };
 
-export const storageSet = <T extends StoreSchemaKey>(key: T, value: StoreSchema[T]): StoreSchema[T] => {
+export const storageSet = <T extends StoreSchemaKey>(key: T, value: StoreSchema[T]): void => {
   store.set(key, value);
-  return value;
 };
