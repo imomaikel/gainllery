@@ -6,6 +6,7 @@ import LoadingScreen from './LoadingScreen';
 export const FileContextProvider = createContext<{
   files: string[];
   selectedFile: string;
+  isVideo: boolean;
 
   previousFile: () => void;
   isPrevious: boolean;
@@ -15,6 +16,7 @@ export const FileContextProvider = createContext<{
 }>({
   files: [],
   selectedFile: '',
+  isVideo: false,
 
   previousFile: () => {},
   isPrevious: false,
@@ -35,6 +37,7 @@ export const FileContext = ({ children }: TFileContextProvider) => {
   const isNext = index + 1 < files.length;
   const isPrevious = index - 1 >= 0;
   const selectedFile = files[index];
+  const isVideo = ['mp4', 'mov', 'webm', 'm4a', 'm4v'].some((extension) => selectedFile.endsWith(extension));
 
   const nextFile = () => setIndex(index + 1);
   const previousFile = () => setIndex(index - 1);
@@ -52,7 +55,7 @@ export const FileContext = ({ children }: TFileContextProvider) => {
   }, []);
 
   return (
-    <FileContextProvider.Provider value={{ files, isNext, isPrevious, selectedFile, nextFile, previousFile }}>
+    <FileContextProvider.Provider value={{ files, isNext, isPrevious, selectedFile, nextFile, previousFile, isVideo }}>
       {children}
       <AnimatePresence>{isLoading && <LoadingScreen key="loading-fade" />}</AnimatePresence>
     </FileContextProvider.Provider>

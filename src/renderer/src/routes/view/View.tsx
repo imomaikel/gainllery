@@ -1,16 +1,16 @@
-import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
-import FileContextMenu from './components/FileContextMenu';
 import { useFileContext } from '@/hooks/useFileContext';
-import { AnimatePresence } from 'framer-motion';
-import { useEventListener } from 'usehooks-ts';
-import SideMenu from './components/SideMenu';
-import { useRef, useState } from 'react';
-import TopBar from './components/TopBar';
 import { cn } from '@/lib/utils';
+import { AnimatePresence } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
+import { useEventListener } from 'usehooks-ts';
+import FileContextMenu from './components/FileContextMenu';
+import SideMenu from './components/SideMenu';
+import TopBar from './components/TopBar';
 
 const View = () => {
-  const { selectedFile, nextFile, isPrevious, isNext, previousFile } = useFileContext();
+  const { selectedFile, nextFile, isPrevious, isNext, previousFile, isVideo } = useFileContext();
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [isTopBarOpen, setIsTopBarOpen] = useState(false);
@@ -39,10 +39,19 @@ const View = () => {
               <TransformComponent
                 wrapperClass={cn('!w-full !h-screen transition-transform', isTopBarOpen && '!h-[calc(100vh-25px)]')}
               >
-                <img
-                  src={`atom://${selectedFile}`}
-                  className={cn('max-h-screen transition-all', isTopBarOpen && 'max-h-[calc(100vh-25px)]')}
-                />
+                {isVideo ? (
+                  <video
+                    src={`atom://${selectedFile}`}
+                    controls
+                    className={cn('max-h-screen', isTopBarOpen && 'max-h-[calc(100vh-25px)]')}
+                    onLoadedData={() => fixViewerSize()}
+                  />
+                ) : (
+                  <img
+                    src={`atom://${selectedFile}`}
+                    className={cn('max-h-screen', isTopBarOpen && 'max-h-[calc(100vh-25px)]')}
+                  />
+                )}
               </TransformComponent>
             </TransformWrapper>
           </ContextMenuTrigger>
