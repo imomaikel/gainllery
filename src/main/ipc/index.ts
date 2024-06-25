@@ -55,6 +55,6 @@ export const registerIPCMainListeners = (window: BrowserWindow) => {
     ).flat();
     storageSet('recentPaths', filesInDirectories);
 
-    broadcastEvent('filesFetched', { paths: filesInDirectories });
+    broadcastEvent('filesFetched', { paths: filesInDirectories, navigateTo: '/view' });
   });
 };

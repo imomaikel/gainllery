@@ -15,6 +15,7 @@ export type IPCCallCallbackReturn<T extends IPCCallKey> = IPCCalls[T]['returns']
 export type IPCReceivers = {
   filesFetched: {
     paths: string[];
+    navigateTo?: string;
   };
   startFilesFetch: void;
   infoToast: string;

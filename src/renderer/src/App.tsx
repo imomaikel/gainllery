@@ -9,11 +9,19 @@ import { useEffect } from 'react';
 const router = createHashRouter([
   {
     path: '/',
-    element: <Menu />,
+    element: (
+      <FileContext>
+        <Menu />
+      </FileContext>
+    ),
   },
   {
     path: '/view',
-    element: <View />,
+    element: (
+      <FileContext>
+        <View />
+      </FileContext>
+    ),
   },
 ]);
 
@@ -26,11 +34,9 @@ const App = () => {
 
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-hidden">
-      <FileContext>
-        <ThemeProvider>
-          <RouterProvider router={router} />
-        </ThemeProvider>
-      </FileContext>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
       <Toaster position="top-left" toastOptions={{ style: { maxWidth: '480px' } }} />
     </div>
   );

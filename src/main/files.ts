@@ -24,7 +24,9 @@ export const getAllFilesRecursively = async (path: string): Promise<string[]> =>
     return files.flat();
   };
 
-  const files = await getFiles(path);
+  const files = (await getFiles(path)) as string[];
+
+  files.sort((a, b) => a.localeCompare(b));
 
   return files;
 };
@@ -46,7 +48,7 @@ export const getAllFilesInDirectory = async (path: string) => {
       }
     })
     .filter((exist) => exist)
-    .sort((a, b) => a!.type.localeCompare(b!.type));
+    .sort((a, b) => a!.type.localeCompare(b!.type) || a!.path.localeCompare(b!.path));
 
   return fileList;
 };
