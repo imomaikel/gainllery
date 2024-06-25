@@ -1,5 +1,6 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import { BrowserWindow, app, protocol, shell } from 'electron';
+import { registerIPCMainListeners } from './ipc';
 import path from 'path';
 
 function createWindow(): void {
@@ -22,6 +23,7 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show();
+    registerIPCMainListeners(mainWindow);
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
