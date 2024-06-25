@@ -1,9 +1,9 @@
 import { useFileContext } from '@/hooks/useFileContext';
 
 const View = () => {
-  const { files } = useFileContext();
+  const { selectedFile } = useFileContext();
 
-  return <div>View</div>;
+  return <div></div>;
 };
 
 export default View;
