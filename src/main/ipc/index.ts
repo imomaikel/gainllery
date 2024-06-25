@@ -1,8 +1,8 @@
 import { IPCCallArguments, IPCCallCallbackReturn, IPCCallKey, IPCReceiveArguments, IPCReceiverKey } from './types';
+import { FILE_TYPES, getAllFilesRecursively } from '../files';
 import { StoreSchema, StoreSchemaKey } from '../store/types';
 import { BrowserWindow, dialog, ipcMain } from 'electron';
 import { storageGet, storageSet } from '../store';
-import { getAllFilesRecursively } from '../files';
 
 // Listen to an event from the renderer
 const handleChannel = <T extends IPCCallKey>(
@@ -55,6 +55,48 @@ export const registerIPCMainListeners = (window: BrowserWindow) => {
     ).flat();
     storageSet('recentPaths', filesInDirectories);
 
-    broadcastEvent('filesFetched', { paths: filesInDirectories, navigateTo: '/view' });
+    broadcastEvent('filesFetched', {
+      paths: filesInDirectories,
+      navigateTo: filesInDirectories.length >= 1 ? '/view' : undefined,
+    });
+  });
+
+  // Open file picker dialog and fetch files
+  handleChannel('openFile', async () => {
+    const pick = await dialog.showOpenDialog({
+      filters: [
+        {
+          name: 'Media',
+          extensions: FILE_TYPES,
+        },
+      ],
+      title: 'Select one or more files',
+      properties: ['multiSelections', 'openFile'],
+    });
+    if (pick.canceled) {
+      broadcastEvent('infoToast', 'Pick canceled!');
+      return;
+    }
+
+    const directories: string[] = [];
+    const files: string[] = [];
+
+    for (const filePath of pick.filePaths) {
+      const isFile = FILE_TYPES.includes(filePath.substring(filePath.lastIndexOf('.') + 1));
+      if (!isFile) {
+        directories.push(filePath);
+      } else {
+        files.push(filePath);
+      }
+    }
+
+    const filesInDirectories = (
+      await Promise.all(directories.map((filePath) => getAllFilesRecursively(filePath)))
+    ).flat();
+
+    const allFiles = files.concat(filesInDirectories);
+    storageSet('recentPaths', allFiles);
+
+    broadcastEvent('filesFetched', { paths: allFiles, navigateTo: allFiles.length >= 1 ? '/view' : undefined });
   });
 };

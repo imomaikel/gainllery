@@ -18,6 +18,7 @@ export const MENU_TABS: {
   {
     label: 'Open file',
     Icon: MdPermMedia,
+    onClick: () => window.ipc.send('openFile'),
   },
   {
     label: 'Open directory',

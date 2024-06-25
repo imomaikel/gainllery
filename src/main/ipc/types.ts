@@ -3,6 +3,10 @@ export type IPCCalls = {
     arguments: never;
     returns: never;
   };
+  openFile: {
+    arguments: never;
+    returns: never;
+  };
 };
 export type IPCCallKey = keyof IPCCalls;
 export type IPCCallArguments<T extends IPCCallKey> = IPCCalls[T]['arguments'] extends never
