@@ -1,42 +1,41 @@
 import { RouterProvider, createHashRouter } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
 import { FileContext } from './components/FileContext';
+import EventListener from './components/EventListener';
 import Browse from './routes/browse/Browse';
-import { Toaster, toast } from 'sonner';
 import Menu from './routes/menu/Menu';
 import View from './routes/view/View';
-import { useEffect } from 'react';
+import { Toaster } from 'sonner';
 
 const router = createHashRouter([
   {
-    path: '/',
-    element: (
-      <FileContext>
-        <Menu />
-      </FileContext>
-    ),
-  },
-  {
-    path: '/view',
-    element: (
-      <FileContext>
-        <View />
-      </FileContext>
-    ),
-  },
-  {
-    path: '/browse',
-    element: <Browse />,
+    element: <EventListener />,
+    children: [
+      {
+        path: '/',
+        element: (
+          <FileContext>
+            <Menu />
+          </FileContext>
+        ),
+      },
+      {
+        path: '/view',
+        element: (
+          <FileContext>
+            <View />
+          </FileContext>
+        ),
+      },
+      {
+        path: '/browse',
+        element: <Browse />,
+      },
+    ],
   },
 ]);
 
 const App = () => {
-  useEffect(() => {
-    window.ipc.on('infoToast', (_, message) => toast.info(message));
-
-    return () => window.ipc.removeListener('infoToast');
-  }, []);
-
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-hidden">
       <ThemeProvider>
