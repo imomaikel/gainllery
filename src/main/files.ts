@@ -35,19 +35,18 @@ export const getAllFilesInDirectory = async (path: string) => {
   const files = await readdir(path, { withFileTypes: true });
 
   const fileList = files
-    .map((dirent) => {
+    .flatMap((dirent) => {
       if (dirent.isDirectory()) {
-        return { type: 'directory', path: dirent.name };
+        return [{ type: 'directory', path: dirent.name }];
       } else {
         const filePath = resolve(dirent.path, dirent.name);
         const fileName = dirent.name.substring(dirent.name.lastIndexOf('.') + 1) as string;
         if (FILE_TYPES.includes(fileName.toLowerCase())) {
-          return { type: 'file', path: filePath };
+          return [{ type: 'file', path: filePath }];
         }
-        return null;
+        return [];
       }
     })
-    .filter((exist) => exist)
     .sort((a, b) => a!.type.localeCompare(b!.type) || a!.path.localeCompare(b!.path));
 
   return fileList;

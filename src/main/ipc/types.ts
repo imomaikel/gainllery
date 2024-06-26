@@ -7,6 +7,21 @@ export type IPCCalls = {
     arguments: never;
     returns: never;
   };
+  selectDirectoryPath: {
+    arguments: never;
+    returns: never;
+  };
+  getAllFilesInDirectory: {
+    arguments: {
+      path: string;
+    };
+    returns: {
+      files: {
+        type: string;
+        path: string;
+      }[];
+    };
+  };
 };
 export type IPCCallKey = keyof IPCCalls;
 export type IPCCallArguments<T extends IPCCallKey> = IPCCalls[T]['arguments'] extends never
@@ -23,6 +38,7 @@ export type IPCReceivers = {
   };
   startFilesFetch: void;
   infoToast: string;
+  redirect: string;
 };
 export type IPCReceiverKey = keyof IPCReceivers;
 export type IPCReceiveArguments<T extends IPCReceiverKey> = IPCReceivers[T] extends void

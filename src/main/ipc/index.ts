@@ -1,5 +1,5 @@
 import { IPCCallArguments, IPCCallCallbackReturn, IPCCallKey, IPCReceiveArguments, IPCReceiverKey } from './types';
-import { FILE_TYPES, getAllFilesRecursively } from '../files';
+import { FILE_TYPES, getAllFilesInDirectory, getAllFilesRecursively } from '../files';
 import { StoreSchema, StoreSchemaKey } from '../store/types';
 import { BrowserWindow, dialog, ipcMain } from 'electron';
 import { storageGet, storageSet } from '../store';
@@ -7,9 +7,9 @@ import { storageGet, storageSet } from '../store';
 // Listen to an event from the renderer
 const handleChannel = <T extends IPCCallKey>(
   channel: T,
-  cb: (event: Electron.IpcMainEvent, ...args: IPCCallArguments<T>) => IPCCallCallbackReturn<T>,
+  cb: (event: Electron.IpcMainEvent, ...args: IPCCallArguments<T>) => PromiseLike<IPCCallCallbackReturn<T>>,
 ) => {
-  ipcMain.on(channel, (event, ...args: IPCCallArguments<T>): IPCCallCallbackReturn<T> => {
+  ipcMain.on(channel, (event, ...args: IPCCallArguments<T>): PromiseLike<IPCCallCallbackReturn<T>> => {
     return cb(event, ...args);
   });
 };
@@ -98,5 +98,28 @@ export const registerIPCMainListeners = (window: BrowserWindow) => {
     storageSet('recentPaths', allFiles);
 
     broadcastEvent('filesFetched', { paths: allFiles, navigateTo: allFiles.length >= 1 ? '/view' : undefined });
+  });
+
+  // Open directory picker dialog and select directory to browse
+  handleChannel('selectDirectoryPath', async () => {
+    const pick = await dialog.showOpenDialog({
+      title: 'Select a directory',
+      properties: ['openDirectory'],
+    });
+    if (pick.canceled && !pick.filePaths[0]) {
+      broadcastEvent('infoToast', 'Pick canceled!');
+      return;
+    }
+
+    const directoryPath = pick.filePaths[0];
+
+    broadcastEvent('redirect', `/browse?directoryPath=${directoryPath}`);
+  });
+
+  // Get all files in a directory
+  handleChannel('getAllFilesInDirectory', async (event, { path }) => {
+    const files = await getAllFilesInDirectory(path);
+
+    return (event.returnValue = { files });
   });
 };

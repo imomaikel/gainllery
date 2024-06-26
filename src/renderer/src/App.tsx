@@ -1,6 +1,7 @@
 import { RouterProvider, createHashRouter } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeProvider';
 import { FileContext } from './components/FileContext';
+import Browse from './routes/browse/Browse';
 import { Toaster, toast } from 'sonner';
 import Menu from './routes/menu/Menu';
 import View from './routes/view/View';
@@ -22,6 +23,10 @@ const router = createHashRouter([
         <View />
       </FileContext>
     ),
+  },
+  {
+    path: '/browse',
+    element: <Browse />,
   },
 ]);
 

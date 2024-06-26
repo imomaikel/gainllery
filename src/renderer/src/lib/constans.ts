@@ -28,6 +28,7 @@ export const MENU_TABS: {
   {
     label: 'Browse directory',
     Icon: FaSearch,
+    onClick: () => window.ipc.send('selectDirectoryPath'),
   },
   {
     label: 'Favorites',
