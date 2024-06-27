@@ -13,6 +13,9 @@ export const FileContextProvider = createContext<{
 
   nextFile: () => void;
   isNext: boolean;
+
+  favoriteSwitch: () => void;
+  isFavorite: boolean;
 }>({
   files: [],
   selectedFile: '',
@@ -23,6 +26,9 @@ export const FileContextProvider = createContext<{
 
   nextFile: () => {},
   isNext: false,
+
+  favoriteSwitch: () => {},
+  isFavorite: false,
 });
 
 type TFileContextProvider = {
@@ -30,6 +36,7 @@ type TFileContextProvider = {
 };
 export const FileContext = ({ children }: TFileContextProvider) => {
   const [files, setFiles] = useState<string[]>(() => window.store.get('recentPaths', []));
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [index, setIndex] = useState(0);
   const navigate = useNavigate();
@@ -43,6 +50,24 @@ export const FileContext = ({ children }: TFileContextProvider) => {
 
   const nextFile = () => setIndex(index + 1);
   const previousFile = () => setIndex(index - 1);
+  const isFavorite = favorites.includes(selectedFile);
+
+  const refetchFavorites = () => {
+    setFavorites(() => window.store.get('favorites', []));
+  };
+
+  const favoriteSwitch = () => {
+    if (isFavorite) {
+      window.store.set(
+        'favorites',
+        favorites.filter((entry) => entry !== selectedFile),
+      );
+      setFavorites(favorites.filter((entry) => entry !== selectedFile));
+    } else {
+      window.store.set('favorites', favorites.concat(selectedFile));
+      setFavorites(favorites.concat(selectedFile));
+    }
+  };
 
   useEffect(() => {
     window.ipc.on('filesFetched', (_, { paths, navigateTo }) => {
@@ -53,11 +78,14 @@ export const FileContext = ({ children }: TFileContextProvider) => {
     window.ipc.on('startFilesFetch', () => {
       setIsLoading(true);
     });
+    refetchFavorites();
     return () => window.ipc.removeListener(['filesFetched', 'startFilesFetch']);
   }, []);
 
   return (
-    <FileContextProvider.Provider value={{ files, isNext, isPrevious, selectedFile, nextFile, previousFile, isVideo }}>
+    <FileContextProvider.Provider
+      value={{ files, isNext, isPrevious, selectedFile, nextFile, previousFile, isVideo, favoriteSwitch, isFavorite }}
+    >
       {children}
       <AnimatePresence>{isLoading && <LoadingScreen key="loading-fade" />}</AnimatePresence>
     </FileContextProvider.Provider>
