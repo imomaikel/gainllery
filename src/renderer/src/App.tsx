@@ -1,4 +1,5 @@
 import { RouterProvider, createHashRouter } from 'react-router-dom';
+import { SettingsContext } from './components/SettingsContext';
 import { ThemeProvider } from './components/ThemeProvider';
 import { FileContext } from './components/FileContext';
 import EventListener from './components/EventListener';
@@ -39,7 +40,9 @@ const App = () => {
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-hidden">
       <ThemeProvider>
-        <RouterProvider router={router} />
+        <SettingsContext>
+          <RouterProvider router={router} />
+        </SettingsContext>
       </ThemeProvider>
       <Toaster position="top-left" toastOptions={{ style: { maxWidth: '480px' } }} />
     </div>
