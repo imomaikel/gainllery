@@ -1,13 +1,31 @@
-import { createContext, useState } from 'react';
+import { TSettingsSchema, SettingsDefaultSchema } from '@/lib/settings';
+import { createContext, useRef } from 'react';
+
+type TSet = <T extends keyof TSettingsSchema>(key: T, value: TSettingsSchema[T]) => void;
+type TGet = <T extends keyof TSettingsSchema>(key: T) => TSettingsSchema[T];
 
 export const SettingsContextProvider = createContext<{
-  moveToTrash: boolean;
+  set: TSet;
+  get: TGet;
 }>({
-  moveToTrash: true,
+  get: (key) => SettingsDefaultSchema[key],
+  set: () => {},
 });
 
 export const SettingsContext = ({ children }: { children: React.ReactNode }) => {
-  const [moveToTrash, setMoveToTrash] = useState(true);
+  const settings = useRef<TSettingsSchema>({
+    ...SettingsDefaultSchema,
+    ...window.store.get('settings', SettingsDefaultSchema),
+  });
 
-  return <SettingsContextProvider.Provider value={{ moveToTrash }}>{children}</SettingsContextProvider.Provider>;
+  const set: TSet = (key, value) => {
+    settings.current[key] = value;
+    window.store.set('settings', settings.current);
+  };
+
+  const get: TGet = (key) => {
+    return settings.current[key];
+  };
+
+  return <SettingsContextProvider.Provider value={{ get, set }}>{children}</SettingsContextProvider.Provider>;
 };

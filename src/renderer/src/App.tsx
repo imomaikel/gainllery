@@ -3,6 +3,7 @@ import { SettingsContext } from './components/SettingsContext';
 import { ThemeProvider } from './components/ThemeProvider';
 import { FileContext } from './components/FileContext';
 import EventListener from './components/EventListener';
+import Settings from './routes/settings/Settings';
 import Browse from './routes/browse/Browse';
 import Menu from './routes/menu/Menu';
 import View from './routes/view/View';
@@ -31,6 +32,10 @@ const router = createHashRouter([
       {
         path: '/browse',
         element: <Browse />,
+      },
+      {
+        path: '/settings',
+        element: <Settings />,
       },
     ],
   },
