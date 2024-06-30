@@ -1,5 +1,6 @@
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
+import FileControls from './components/file-controls/FileControls';
 import FileContextMenu from './components/FileContextMenu';
 import { useFileContext } from '@/hooks/useFileContext';
 import { AnimatePresence } from 'framer-motion';
@@ -77,6 +78,7 @@ const View = () => {
           />
         </ContextMenu>
       </div>
+      <FileControls />
     </div>
   );
 };
