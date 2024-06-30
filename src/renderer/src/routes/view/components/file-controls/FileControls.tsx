@@ -38,12 +38,12 @@ const FileControls = () => {
 
   const showBar = () => {
     if (preventHide.current || !scope.current) return;
-    animate(scope.current, { y: 0 }, { type: 'tween', duration: 0 });
+    animate(scope.current, { y: 0 }, { type: 'tween', duration: settings.reduceMotion(0.25) });
     isInView.current = true;
   };
   const hideBar = () => {
     if (preventHide.current || !scope.current) return;
-    animate(scope.current, { y: 200 }, { type: 'tween', duration: 0 });
+    animate(scope.current, { y: 200 }, { type: 'tween', duration: settings.reduceMotion(0.75) });
     isInView.current = false;
   };
 

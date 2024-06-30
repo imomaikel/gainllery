@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useFileContext } from '@/hooks/useFileContext';
+import { useSettings } from '@/hooks/useSettings';
 import { useNavigate } from 'react-router-dom';
 import { MENU_TABS } from '@/lib/constans';
 import { useState } from 'react';
@@ -11,6 +12,7 @@ export const HoverEffect = ({ items }: THoverEffect) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const { files } = useFileContext();
   const navigate = useNavigate();
+  const settings = useSettings();
 
   const hasPreviousFile = files.length >= 1;
 
@@ -33,12 +35,13 @@ export const HoverEffect = ({ items }: THoverEffect) => {
                   initial={{ opacity: 0 }}
                   animate={{
                     opacity: 1,
-                    transition: { duration: 0.15 },
+                    transition: { duration: settings.reduceMotion(0.15) },
                   }}
                   exit={{
                     opacity: 0,
-                    transition: { duration: 0.15, delay: 0.2 },
+                    transition: { duration: settings.reduceMotion(0.15), delay: 0.2 },
                   }}
+                  transition={{ duration: settings.reduceMotion() }}
                 />
               )}
             </AnimatePresence>

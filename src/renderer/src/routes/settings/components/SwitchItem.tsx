@@ -10,8 +10,9 @@ type TSwitchItem = {
   description?: string;
   checked: boolean;
   onSwitch: (newState: boolean) => void;
+  animationDuration: number;
 };
-const SwitchItem = ({ label, onSwitch, description, checked }: TSwitchItem) => {
+const SwitchItem = ({ label, onSwitch, description, checked, animationDuration }: TSwitchItem) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -38,6 +39,7 @@ const SwitchItem = ({ label, onSwitch, description, checked }: TSwitchItem) => {
             animate={{ height: 'auto' }}
             exit={{ height: 0 }}
             key={`description-${label}`}
+            transition={{ duration: animationDuration }}
           >
             {description}
           </motion.div>

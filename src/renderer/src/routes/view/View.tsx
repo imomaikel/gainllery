@@ -3,6 +3,7 @@ import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import FileControls from './components/file-controls/FileControls';
 import FileContextMenu from './components/FileContextMenu';
 import { useFileContext } from '@/hooks/useFileContext';
+import { useSettings } from '@/hooks/useSettings';
 import { AnimatePresence } from 'framer-motion';
 import { useEventListener } from 'usehooks-ts';
 import { useNavigate } from 'react-router-dom';
@@ -17,9 +18,14 @@ const View = () => {
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [isTopBarOpen, setIsTopBarOpen] = useState(false);
   const navigate = useNavigate();
+  const settings = useSettings();
 
-  const fixViewerSize = (timeout: number = 0) =>
-    setTimeout(() => transformComponentRef.current?.centerView(1, timeout), timeout);
+  const fixViewerSize = (timeout: number = 0) => {
+    setTimeout(
+      () => transformComponentRef.current?.centerView(1, settings.reduceMotion(timeout)),
+      settings.reduceMotion(timeout),
+    );
+  };
 
   useEventListener('resize', () => fixViewerSize());
 
@@ -31,9 +37,11 @@ const View = () => {
 
   return (
     <div className="relative flex flex-col">
-      <AnimatePresence>{isTopBarOpen && <TopBar />}</AnimatePresence>
+      <AnimatePresence>{isTopBarOpen && <TopBar animationDuration={settings.reduceMotion(0.2)} />}</AnimatePresence>
       <div className="relative flex h-full w-full">
-        <AnimatePresence>{isSideMenuOpen && <SideMenu />}</AnimatePresence>
+        <AnimatePresence>
+          {isSideMenuOpen && <SideMenu animationDuration={settings.reduceMotion(0.2)} />}
+        </AnimatePresence>
         <ContextMenu>
           <ContextMenuTrigger className="h-full w-full">
             <TransformWrapper

@@ -3,13 +3,16 @@ import { createContext, useRef } from 'react';
 
 type TSet = <T extends keyof TSettingsSchema>(key: T, value: TSettingsSchema[T]) => void;
 type TGet = <T extends keyof TSettingsSchema>(key: T) => TSettingsSchema[T];
+type TReduceMotion = (delayInSeconds?: number) => number;
 
 export const SettingsContextProvider = createContext<{
   set: TSet;
   get: TGet;
+  reduceMotion: TReduceMotion;
 }>({
   get: (key) => SettingsDefaultSchema[key],
   set: () => {},
+  reduceMotion: () => 0,
 });
 
 export const SettingsContext = ({ children }: { children: React.ReactNode }) => {
@@ -27,5 +30,11 @@ export const SettingsContext = ({ children }: { children: React.ReactNode }) => 
     return settings.current[key];
   };
 
-  return <SettingsContextProvider.Provider value={{ get, set }}>{children}</SettingsContextProvider.Provider>;
+  const reduceMotion: TReduceMotion = (delayInSeconds) => {
+    return settings.current['noAnimations'] ? 0 : delayInSeconds || 0.5;
+  };
+
+  return (
+    <SettingsContextProvider.Provider value={{ get, set, reduceMotion }}>{children}</SettingsContextProvider.Provider>
+  );
 };

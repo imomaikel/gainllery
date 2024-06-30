@@ -1,9 +1,11 @@
+import { useSettings } from '@/hooks/useSettings';
 import { MoonLoader } from 'react-spinners';
-import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
 const LoadingScreen = () => {
   const [needExtraTime, setNeedExtraTime] = useState(false);
+  const settings = useSettings();
 
   useEffect(() => {
     const timeout = setTimeout(() => setNeedExtraTime(true), 5_000);
@@ -15,6 +17,7 @@ const LoadingScreen = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: [0, 1] }}
       exit={{ opacity: [1, 0] }}
+      transition={{ duration: settings.reduceMotion() }}
       className="fixed z-[100] flex h-screen w-screen items-center justify-center bg-background"
     >
       <div className="mt-4 flex items-center justify-center space-x-6">
