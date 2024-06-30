@@ -1,7 +1,8 @@
-import { useEventListener, useHover } from 'usehooks-ts';
 import { useFileContext } from '@/hooks/useFileContext';
+import { useSettings } from '@/hooks/useSettings';
 import { useAnimate } from 'framer-motion';
 import { useEffect, useRef } from 'react';
+import { useHover } from 'usehooks-ts';
 import Previous from './Previous';
 import Next from './Next';
 
@@ -12,27 +13,37 @@ const FileControls = () => {
   const isHovering = useHover(scope);
   const preventHide = useRef(false);
   const isInView = useRef(false);
+  const settings = useSettings();
 
-  useEventListener('mousemove', () => {
-    if (!isInView.current) showBar();
+  useEffect(() => {
+    const handleMouseMove = () => {
+      if (!isInView.current) showBar();
 
-    if (debouncedAnimate.current) window.clearTimeout(debouncedAnimate.current);
+      if (debouncedAnimate.current) window.clearTimeout(debouncedAnimate.current);
 
-    debouncedAnimate.current = window.setTimeout(hideBar, 1_000);
-  });
+      debouncedAnimate.current = window.setTimeout(hideBar, 1_000);
+    };
+
+    if (settings.get('autoHideBottomControls')) {
+      window.addEventListener('mousemove', handleMouseMove);
+      showBar();
+    }
+
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   useEffect(() => {
     preventHide.current = isHovering;
   }, [isHovering]);
 
   const showBar = () => {
-    if (preventHide.current) return;
-    animate(scope.current, { y: 0 }, { type: 'tween', duration: 0.25 });
+    if (preventHide.current || !scope.current) return;
+    animate(scope.current, { y: 0 }, { type: 'tween', duration: 0 });
     isInView.current = true;
   };
   const hideBar = () => {
-    if (preventHide.current) return;
-    animate(scope.current, { y: 200 }, { type: 'tween', duration: 0.75 });
+    if (preventHide.current || !scope.current) return;
+    animate(scope.current, { y: 200 }, { type: 'tween', duration: 0 });
     isInView.current = false;
   };
 
