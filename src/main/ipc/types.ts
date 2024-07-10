@@ -22,6 +22,14 @@ export type IPCCalls = {
       }[];
     };
   };
+  getDirectoryPath: {
+    arguments: never;
+    returns: { label: string; path: string }[] | null;
+  };
+  moveToDirectory: {
+    arguments: { dirPath: string; filePath: string; asFavorite?: boolean };
+    returns: boolean;
+  };
 };
 export type IPCCallKey = keyof IPCCalls;
 export type IPCCallArguments<T extends IPCCallKey> = IPCCalls[T]['arguments'] extends never

@@ -1,8 +1,9 @@
 import { IPCCallArguments, IPCCallCallbackReturn, IPCCallKey, IPCReceiveArguments, IPCReceiverKey } from './types';
-import { FILE_TYPES, getAllFilesInDirectory, getAllFilesRecursively } from '../files';
+import { FILE_TYPES, getAllFilesInDirectory, getAllFilesRecursively, moveFile } from '../files';
 import { StoreSchema, StoreSchemaKey } from '../store/types';
 import { BrowserWindow, dialog, ipcMain } from 'electron';
 import { storageGet, storageSet } from '../store';
+import path from 'path';
 
 // Listen to an event from the renderer
 const handleChannel = <T extends IPCCallKey>(
@@ -117,9 +118,47 @@ export const registerIPCMainListeners = (window: BrowserWindow) => {
   });
 
   // Get all files in a directory
-  handleChannel('getAllFilesInDirectory', async (event, { path }) => {
-    const files = await getAllFilesInDirectory(path);
+  handleChannel('getAllFilesInDirectory', async (event, { path: dirPath }) => {
+    const files = await getAllFilesInDirectory(dirPath);
 
     return (event.returnValue = { files });
+  });
+
+  // Select directory and get its path
+  handleChannel('getDirectoryPath', async (event) => {
+    const pick = await dialog.showOpenDialog({
+      title: 'Select one or more directories',
+      properties: ['openDirectory', 'multiSelections'],
+    });
+    if (pick.canceled || !pick.filePaths[0]) {
+      return (event.returnValue = null);
+    }
+
+    const currentDirectories = storageGet('favoriteDirectories', []);
+    const currentDirectoriesKeys = currentDirectories.map(({ path: dirPath }) => dirPath);
+
+    const newDirs = pick.filePaths
+      .filter((dirPath) => !currentDirectoriesKeys.includes(dirPath))
+      .map((dirPath) => ({
+        label: path.basename(dirPath),
+        path: dirPath,
+      }));
+    if (!newDirs.length) return (event.returnValue = null);
+
+    storageSet('favoriteDirectories', currentDirectories.concat(newDirs));
+
+    return (event.returnValue = newDirs);
+  });
+
+  // Move a file to a different directory
+  handleChannel('moveToDirectory', async (event, { dirPath, filePath, asFavorite }) => {
+    const newPath = await moveFile(dirPath, filePath);
+    if (!newPath) return (event.returnValue = false);
+
+    if (asFavorite) {
+      storageSet('favoriteFiles', storageGet('favoriteFiles', []).concat(newPath));
+    }
+
+    return (event.returnValue = true);
   });
 };

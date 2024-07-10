@@ -14,6 +14,8 @@ export const FileContextProvider = createContext<{
   nextFile: () => void;
   isNext: boolean;
 
+  excludeSelectedFile: () => void;
+
   favoriteSwitch: () => void;
   isFavorite: boolean;
 }>({
@@ -23,6 +25,8 @@ export const FileContextProvider = createContext<{
 
   previousFile: () => {},
   isPrevious: false,
+
+  excludeSelectedFile: () => {},
 
   nextFile: () => {},
   isNext: false,
@@ -53,18 +57,22 @@ export const FileContext = ({ children }: TFileContextProvider) => {
   const isFavorite = favorites.includes(selectedFile);
 
   const refetchFavorites = () => {
-    setFavorites(() => window.store.get('favorites', []));
+    setFavorites(() => window.store.get('favoriteFiles', []));
+  };
+
+  const excludeSelectedFile = () => {
+    setFiles((prev) => prev.filter((entry) => entry !== selectedFile));
   };
 
   const favoriteSwitch = () => {
     if (isFavorite) {
       window.store.set(
-        'favorites',
+        'favoriteFiles',
         favorites.filter((entry) => entry !== selectedFile),
       );
       setFavorites(favorites.filter((entry) => entry !== selectedFile));
     } else {
-      window.store.set('favorites', favorites.concat(selectedFile));
+      window.store.set('favoriteFiles', favorites.concat(selectedFile));
       setFavorites(favorites.concat(selectedFile));
     }
   };
@@ -84,7 +92,18 @@ export const FileContext = ({ children }: TFileContextProvider) => {
 
   return (
     <FileContextProvider.Provider
-      value={{ files, isNext, isPrevious, selectedFile, nextFile, previousFile, isVideo, favoriteSwitch, isFavorite }}
+      value={{
+        files,
+        isNext,
+        isPrevious,
+        selectedFile,
+        nextFile,
+        previousFile,
+        isVideo,
+        favoriteSwitch,
+        isFavorite,
+        excludeSelectedFile,
+      }}
     >
       {children}
       <AnimatePresence>{isLoading && <LoadingScreen key="loading-fade" />}</AnimatePresence>
