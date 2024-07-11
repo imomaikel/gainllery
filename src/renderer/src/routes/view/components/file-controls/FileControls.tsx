@@ -30,6 +30,15 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
     videoRef: isVideo ? (_ref as React.MutableRefObject<HTMLVideoElement>) : null,
   };
 
+  const loopVideos = settings.all.loopVideos;
+  const autoPlayVideos = settings.all.autoPlayVideos;
+
+  useEffect(() => {
+    if (!videoRef?.current) return;
+    videoRef.current.loop = loopVideos;
+    videoRef.current.autoplay = autoPlayVideos;
+  }, [loopVideos, autoPlayVideos]);
+
   const handleVideoSeek = (newDuration: number[]) => {
     if (!videoRef?.current) return;
     videoSliderInUse.current = true;
@@ -69,10 +78,17 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
       if (!videoRef?.current) return;
       setVideoDuration(videoRef.current.duration);
     };
-
+    const onPlay = () => setVideoPaused(false);
+    const onPause = () => setVideoPaused(true);
     if (videoRef?.current) {
       videoRef.current.ontimeupdate = onVideoTimeUpdate;
       videoRef.current.onloadedmetadata = onVideoMetadataLoaded;
+      videoRef.current.onpause = onPause;
+      videoRef.current.onplay = onPlay;
+      videoRef.current.muted = videoMuted;
+      videoRef.current.volume = videoVolume;
+      videoRef.current.loop = settings.get('loopVideos');
+      videoRef.current.autoplay = settings.get('autoPlayVideos');
     }
   }, [_ref]);
 
@@ -93,7 +109,6 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
     } else {
       videoRef.current.pause();
     }
-    setVideoPaused(!videoPaused);
   };
   const handleVolumeChange = (value: number[]) => {
     const newVolume = value[0];
