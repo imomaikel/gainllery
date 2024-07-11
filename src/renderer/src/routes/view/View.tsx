@@ -16,9 +16,9 @@ const View = () => {
   const { selectedFile, nextFile, isPrevious, isNext, previousFile, isVideo, deleteSelectedFile } = useFileContext();
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const videoRef = useRef<ElementRef<'video'> | null>(null);
   const [isTopBarOpen, setIsTopBarOpen] = useState(false);
-  const videoRef = useRef<ElementRef<'video'>>(null);
-  const imgRef = useRef<ElementRef<'img'>>(null);
+  const imgRef = useRef<ElementRef<'img'> | null>(null);
   const navigate = useNavigate();
   const settings = useSettings();
 
@@ -72,7 +72,6 @@ const View = () => {
                   <video
                     src={`atom://${selectedFile}`}
                     ref={videoRef}
-                    controls
                     className={cn('max-h-screen', isTopBarOpen && 'max-h-[calc(100vh-25px)]')}
                     onLoadedData={() => fixViewerSize()}
                   />
@@ -100,7 +99,7 @@ const View = () => {
           />
         </ContextMenu>
       </div>
-      <FileControls />
+      <FileControls ref={isVideo ? videoRef : imgRef} />
     </div>
   );
 };
