@@ -11,6 +11,7 @@ export const FileContextProvider = createContext<{
 
   previousFile: () => void;
   isPrevious: boolean;
+  index: number;
 
   nextFile: () => void;
   isNext: boolean;
@@ -27,6 +28,7 @@ export const FileContextProvider = createContext<{
 
   previousFile: () => {},
   isPrevious: false,
+  index: 0,
 
   excludeSelectedFile: () => {},
   deleteSelectedFile: () => true,
@@ -121,6 +123,7 @@ export const FileContext = ({ children }: TFileContextProvider) => {
         isFavorite,
         excludeSelectedFile,
         deleteSelectedFile,
+        index,
       }}
     >
       {children}
