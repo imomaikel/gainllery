@@ -4,6 +4,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { Slider } from '@/components/ui/slider';
 import { useAnimate } from 'framer-motion';
 import { useHover } from 'usehooks-ts';
+import PlayPause from './PlayPause';
 import Previous from './Previous';
 import Next from './Next';
 
@@ -16,6 +17,7 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
   const isInView = useRef(false);
   const settings = useSettings();
 
+  const [videoPaused, setVideoPaused] = useState(true);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
   const videoSliderInUse = useRef(false);
@@ -82,6 +84,15 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
     animate(scope.current, { y: 200 }, { type: 'tween', duration: settings.reduceMotion(0.75) });
     isInView.current = false;
   };
+  const handlePlayPause = () => {
+    if (!videoRef?.current) return;
+    if (videoPaused) {
+      videoRef.current.play();
+    } else {
+      videoRef.current.pause();
+    }
+    setVideoPaused(!videoPaused);
+  };
 
   return (
     <div ref={scope} className="fixed bottom-0 w-screen border-t-2 bg-background/65">
@@ -89,10 +100,14 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
         <div className="flex items-center space-x-2">
           <Previous disabled={!isPrevious} onClick={previousFile} />
           <Next disabled={!isNext} onClick={nextFile} />
+          {isVideo && <PlayPause paused={videoPaused} onClick={handlePlayPause} />}
         </div>
-        <div className="mx-4 w-full" onClick={() => (videoSliderInUse.current = false)}>
-          <Slider min={0} max={videoDuration} onValueChange={handleVideoSeek} step={0.01} value={[videoProgress]} />
-        </div>
+
+        {isVideo && (
+          <div className="mx-4 w-full" onClick={() => (videoSliderInUse.current = false)}>
+            <Slider min={0} max={videoDuration} onValueChange={handleVideoSeek} step={0.01} value={[videoProgress]} />
+          </div>
+        )}
       </div>
     </div>
   );
