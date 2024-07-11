@@ -6,6 +6,7 @@ import { useAnimate } from 'framer-motion';
 import { useHover } from 'usehooks-ts';
 import PlayPause from './PlayPause';
 import Previous from './Previous';
+import Volume from './Volume';
 import Next from './Next';
 
 const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) => {
@@ -17,9 +18,11 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
   const isInView = useRef(false);
   const settings = useSettings();
 
-  const [videoPaused, setVideoPaused] = useState(true);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [videoPaused, setVideoPaused] = useState(true);
+  const [videoMuted, setVideoMuted] = useState(false);
+  const [videoVolume, setVideoVolume] = useState(1);
   const videoSliderInUse = useRef(false);
 
   const { imgRef, videoRef } = {
@@ -65,7 +68,6 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
     const onVideoMetadataLoaded = () => {
       if (!videoRef?.current) return;
       setVideoDuration(videoRef.current.duration);
-      console.log(videoRef.current.duration);
     };
 
     if (videoRef?.current) {
@@ -93,10 +95,21 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
     }
     setVideoPaused(!videoPaused);
   };
+  const handleVolumeChange = (value: number[]) => {
+    const newVolume = value[0];
+    if (!videoRef?.current) return;
+    videoRef.current.volume = newVolume;
+    setVideoVolume(newVolume);
+  };
+  const handleMuteToggle = () => {
+    if (!videoRef?.current) return;
+    videoRef.current.muted = !videoMuted;
+    setVideoMuted(!videoMuted);
+  };
 
   return (
-    <div ref={scope} className="fixed bottom-0 w-screen border-t-2 bg-background/65">
-      <div className="flex items-center justify-between p-1">
+    <div ref={scope} className="fixed bottom-0 w-screen border-t-2 bg-background/65 px-1">
+      <div className="flex items-center justify-between space-x-4 p-1">
         <div className="flex items-center space-x-2">
           <Previous disabled={!isPrevious} onClick={previousFile} />
           <Next disabled={!isNext} onClick={nextFile} />
@@ -104,8 +117,14 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
         </div>
 
         {isVideo && (
-          <div className="mx-4 w-full" onClick={() => (videoSliderInUse.current = false)}>
+          <div className="flex w-full items-center space-x-2" onClick={() => (videoSliderInUse.current = false)}>
             <Slider min={0} max={videoDuration} onValueChange={handleVideoSeek} step={0.01} value={[videoProgress]} />
+            <Volume
+              onVolumeChange={handleVolumeChange}
+              volume={videoVolume}
+              muted={videoMuted}
+              toggleMute={handleMuteToggle}
+            />
           </div>
         )}
       </div>
