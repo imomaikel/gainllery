@@ -30,7 +30,15 @@ export type IPCCalls = {
     arguments: { dirPath: string; filePath: string; asFavorite?: boolean };
     returns: boolean;
   };
+  deleteFile: {
+    arguments: {
+      filePath: string;
+      trashItem?: boolean;
+    };
+    returns: boolean;
+  };
 };
+
 export type IPCCallKey = keyof IPCCalls;
 export type IPCCallArguments<T extends IPCCallKey> = IPCCalls[T]['arguments'] extends never
   ? [undefined?]

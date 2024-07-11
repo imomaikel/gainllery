@@ -1,5 +1,5 @@
 import { IPCCallArguments, IPCCallCallbackReturn, IPCCallKey, IPCReceiveArguments, IPCReceiverKey } from './types';
-import { FILE_TYPES, getAllFilesInDirectory, getAllFilesRecursively, moveFile } from '../files';
+import { deleteFile, FILE_TYPES, getAllFilesInDirectory, getAllFilesRecursively, moveFile } from '../files';
 import { StoreSchema, StoreSchemaKey } from '../store/types';
 import { BrowserWindow, dialog, ipcMain } from 'electron';
 import { storageGet, storageSet } from '../store';
@@ -160,5 +160,12 @@ export const registerIPCMainListeners = (window: BrowserWindow) => {
     }
 
     return (event.returnValue = true);
+  });
+
+  // Delete or trash an item
+  handleChannel('deleteFile', async (event, { filePath, trashItem }) => {
+    const actionStatus = await deleteFile(filePath, trashItem);
+
+    return (event.returnValue = actionStatus);
   });
 };

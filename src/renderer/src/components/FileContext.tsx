@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
+import { toast } from 'sonner';
 
 export const FileContextProvider = createContext<{
   files: string[];
@@ -15,6 +16,7 @@ export const FileContextProvider = createContext<{
   isNext: boolean;
 
   excludeSelectedFile: () => void;
+  deleteSelectedFile: () => boolean;
 
   favoriteSwitch: () => void;
   isFavorite: boolean;
@@ -27,6 +29,7 @@ export const FileContextProvider = createContext<{
   isPrevious: false,
 
   excludeSelectedFile: () => {},
+  deleteSelectedFile: () => true,
 
   nextFile: () => {},
   isNext: false,
@@ -61,7 +64,21 @@ export const FileContext = ({ children }: TFileContextProvider) => {
   };
 
   const excludeSelectedFile = () => {
-    setFiles((prev) => prev.filter((entry) => entry !== selectedFile));
+    const updateFiles = window.store.get('recentPaths', []).filter((entry) => entry !== selectedFile);
+    window.store.set('recentPaths', updateFiles);
+    setFiles(updateFiles);
+  };
+
+  const deleteSelectedFile = () => {
+    const isSuccess = window.ipc.sendSync('deleteFile', { filePath: selectedFile, trashItem: true });
+
+    if (isSuccess) {
+      excludeSelectedFile();
+    } else {
+      toast.error('Something went wrong!');
+    }
+
+    return isSuccess;
   };
 
   const favoriteSwitch = () => {
@@ -103,6 +120,7 @@ export const FileContext = ({ children }: TFileContextProvider) => {
         favoriteSwitch,
         isFavorite,
         excludeSelectedFile,
+        deleteSelectedFile,
       }}
     >
       {children}

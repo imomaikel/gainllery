@@ -1,5 +1,6 @@
 import path, { resolve } from 'path';
 import { promisify } from 'util';
+import { shell } from 'electron';
 import fs from 'fs';
 
 const renameFile = promisify(fs.rename);
@@ -81,4 +82,17 @@ export const moveFile = async (dirPath: string, filePath: string): Promise<false
   });
 
   return moveResult;
+};
+
+export const deleteFile = async (filePath: string, trashItem?: boolean): Promise<boolean> => {
+  try {
+    if (trashItem) {
+      await shell.trashItem(filePath);
+    } else {
+      await unlinkFile(filePath);
+    }
+    return true;
+  } catch {
+    return false;
+  }
 };
