@@ -151,8 +151,8 @@ export const registerIPCMainListeners = (window: BrowserWindow) => {
   });
 
   // Move a file to a different directory
-  handleChannel('moveToDirectory', async (event, { dirPath, filePath, asFavorite }) => {
-    const newPath = await moveFile(dirPath, filePath);
+  handleChannel('moveToDirectory', async (event, { dirPath, filePath, asFavorite, customName }) => {
+    const newPath = await moveFile(dirPath, filePath, customName);
     if (!newPath) return (event.returnValue = false);
 
     if (asFavorite) {

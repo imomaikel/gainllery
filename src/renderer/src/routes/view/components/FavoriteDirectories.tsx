@@ -1,3 +1,11 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { FaPlus, FaTrash, FaHeart } from 'react-icons/fa6';
 import { useFileContext } from '@/hooks/useFileContext';
 import { useEffect, useMemo, useState } from 'react';
@@ -9,12 +17,20 @@ import { toast } from 'sonner';
 
 const FavoriteDirectories = () => {
   const [favoriteDirectories, setFavoriteDirectories] = useState<{ label: string; path: string }[]>([]);
+  const [customNameDialog, setCustomNameDialog] = useState<string | null>(null);
   const { selectedFile, excludeSelectedFile } = useFileContext();
   const [directoryFilter, setDirectoryFilter] = useState('');
+  const [customName, setCustomName] = useState('');
 
   useEffect(() => {
     setFavoriteDirectories(window.store.get('favoriteDirectories', []));
   }, []);
+  useEffect(() => {
+    if (!selectedFile || !selectedFile.includes('.')) return;
+    const fileNameSplit = selectedFile.split('\\');
+    const fileName = fileNameSplit[fileNameSplit.length - 1].split('.')[0];
+    setCustomName(fileName);
+  }, [selectedFile]);
 
   const addDirectory = () => {
     const path = window.ipc.sendSync('getDirectoryPath');
@@ -27,13 +43,25 @@ const FavoriteDirectories = () => {
     setFavoriteDirectories(updatedDirectories);
   };
 
-  const moveToDirectory = (dirPath: string, asFavorite?: boolean) => {
-    const isSuccess = window.ipc.sendSync('moveToDirectory', { dirPath, filePath: selectedFile, asFavorite });
+  const moveWithCustomName = (asFavorite: boolean) => {
+    if (!customNameDialog) return;
+    const isSuccess = moveToDirectory(customNameDialog, asFavorite, true);
+    if (isSuccess) setCustomNameDialog(null);
+  };
+
+  const moveToDirectory = (dirPath: string, asFavorite: boolean, withCustomName: boolean = false): boolean => {
+    const isSuccess = window.ipc.sendSync('moveToDirectory', {
+      dirPath,
+      filePath: selectedFile,
+      asFavorite,
+      customName: withCustomName ? customName : undefined,
+    });
     if (!isSuccess) {
       toast.error('Something went wrong!');
     } else {
       excludeSelectedFile();
     }
+    return isSuccess;
   };
 
   const directories = useMemo(() => {
@@ -88,6 +116,7 @@ const FavoriteDirectories = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => moveToDirectory(dir.path, false)}
+                    onContextMenu={() => setCustomNameDialog(dir.path)}
                   >
                     {dir.label}
                   </Button>
@@ -107,6 +136,24 @@ const FavoriteDirectories = () => {
           <span className="mt-1 text-center text-xs text-muted-foreground">No Directories</span>
         )}
       </div>
+      <Dialog open={!!customNameDialog} onOpenChange={() => setCustomNameDialog(null)}>
+        <DialogContent className="max-w-[90vw] md:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Custom Name</DialogTitle>
+            <DialogDescription>
+              You can move this file to the favorite directory and give it a custom name.
+            </DialogDescription>
+          </DialogHeader>
+          <div>
+            <Label>Custom Name</Label>
+            <Input type="text" value={customName} onChange={(event) => setCustomName(event.target.value)} />
+          </div>
+          <DialogFooter>
+            <Button onClick={() => moveWithCustomName(true)}>Move as Favorite</Button>
+            <Button onClick={() => moveWithCustomName(false)}>Move</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

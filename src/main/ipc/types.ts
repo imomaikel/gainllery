@@ -27,7 +27,7 @@ export type IPCCalls = {
     returns: { label: string; path: string }[] | null;
   };
   moveToDirectory: {
-    arguments: { dirPath: string; filePath: string; asFavorite?: boolean };
+    arguments: { dirPath: string; filePath: string; asFavorite: boolean; customName?: string };
     returns: boolean;
   };
   deleteFile: {

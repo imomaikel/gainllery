@@ -55,11 +55,25 @@ export const getAllFilesInDirectory = async (dirPath: string) => {
   return fileList;
 };
 
-export const moveFile = async (dirPath: string, filePath: string): Promise<false | string> => {
+export const moveFile = async (
+  dirPath: string,
+  filePath: string,
+  customName: string | undefined,
+): Promise<false | string> => {
   const moveResult = await new Promise<false | string>((res) => {
     try {
       const fileName = path.basename(filePath);
-      const newPath = path.resolve(dirPath, fileName);
+      const fileExt = path.extname(filePath);
+
+      const newFileName = customName ? `${customName}${fileExt}` : fileName;
+
+      let newPath = path.resolve(dirPath, newFileName);
+      let idx = 0;
+
+      do {
+        const checkNewName = `${path.basename(newFileName, fileExt)} (${++idx})${fileExt}`;
+        newPath = path.resolve(dirPath, checkNewName);
+      } while (fs.existsSync(newPath));
 
       renameFile(filePath, newPath)
         .then(() => res(newPath))
