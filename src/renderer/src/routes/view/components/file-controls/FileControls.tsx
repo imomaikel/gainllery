@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { useFileContext } from '@/hooks/useFileContext';
 import { useSettings } from '@/hooks/useSettings';
 import { Slider } from '@/components/ui/slider';
@@ -6,11 +6,12 @@ import { useAnimate } from 'framer-motion';
 import { useHover } from 'usehooks-ts';
 import PlayPause from './PlayPause';
 import Previous from './Previous';
+import { pad } from '@/lib/utils';
 import Volume from './Volume';
 import Next from './Next';
 
 const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) => {
-  const { isPrevious, isNext, previousFile, nextFile, isVideo } = useFileContext();
+  const { isPrevious, isNext, previousFile, nextFile, isVideo, selectedFile } = useFileContext();
   const debouncedAnimate = useRef<number | null>(null);
   const [scope, animate] = useAnimate();
   const isHovering = useHover(scope);
@@ -78,8 +79,10 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
       if (!videoRef?.current) return;
       setVideoDuration(videoRef.current.duration);
     };
+
     const onPlay = () => setVideoPaused(false);
     const onPause = () => setVideoPaused(true);
+
     if (videoRef?.current) {
       videoRef.current.ontimeupdate = onVideoTimeUpdate;
       videoRef.current.onloadedmetadata = onVideoMetadataLoaded;
@@ -90,7 +93,7 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
       videoRef.current.loop = settings.get('loopVideos');
       videoRef.current.autoplay = settings.get('autoPlayVideos');
     }
-  }, [_ref]);
+  }, [selectedFile]);
 
   const showBar = () => {
     if (preventHide.current || !scope.current) return;
@@ -122,6 +125,21 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
     setVideoMuted(!videoMuted);
   };
 
+  const totalDurationText = useMemo(() => {
+    const totalHours = Math.floor(videoDuration / 3600);
+    const totalMinutes = Math.floor((videoDuration - totalHours * 3600) / 60);
+    const totalSeconds = Math.floor(videoDuration - totalHours * 3600 - totalMinutes * 60);
+    return `${totalHours ? `${pad(totalHours)}:` : ''}${pad(totalMinutes)}:${pad(totalSeconds)}`;
+  }, [videoDuration]);
+
+  const currentProgressText = useMemo(() => {
+    const currentHours = Math.floor(videoProgress / 3600);
+    const currentMinutes = Math.floor((videoProgress - currentHours * 3600) / 60);
+    const currentSeconds = Math.floor(videoProgress - currentHours * 3600 - currentMinutes * 60);
+
+    return `${currentHours ? `${pad(currentHours)}:` : ''}${pad(currentMinutes)}:${pad(currentSeconds)}`;
+  }, [videoProgress]);
+
   return (
     <div ref={scope} className="fixed bottom-0 w-screen border-t-2 bg-background/65 px-1">
       <div className="flex items-center justify-between space-x-4 p-1">
@@ -133,7 +151,9 @@ const FileControls = forwardRef<HTMLVideoElement | HTMLImageElement>((_, _ref) =
 
         {isVideo && (
           <div className="flex w-full items-center space-x-2" onClick={() => (videoSliderInUse.current = false)}>
+            <span>{currentProgressText}</span>
             <Slider min={0} max={videoDuration} onValueChange={handleVideoSeek} step={0.01} value={[videoProgress]} />
+            <span>{totalDurationText}</span>
             <Volume
               onVolumeChange={handleVolumeChange}
               volume={videoVolume}
