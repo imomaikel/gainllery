@@ -5,6 +5,7 @@ import Item from './Item';
 
 const Browse = () => {
   const [files, setFiles] = useState<string[]>(window.store.get('favoriteFiles', []));
+  const [size, setSize] = useState(256);
 
   const filesWithData = useMemo(() => {
     const withData = files.map((filePath) => ({
@@ -25,16 +26,22 @@ const Browse = () => {
         Item: ({ children }) => (
           <div
             style={{
-              width: '256px',
-              height: '256px',
+              width: `${size}px`,
+              height: `${size}px`,
             }}
           >
             {children}
           </div>
         ),
       }) satisfies GridComponents,
-    [],
+    [size],
   );
+
+  const handleRemoveFromFav = (path: string) => {
+    const filteredFiles = files.filter((filePath) => filePath !== path);
+    setFiles(filteredFiles);
+    window.store.set('favoriteFiles', filteredFiles);
+  };
 
   return (
     <>
@@ -42,7 +49,7 @@ const Browse = () => {
         className="h-screen w-screen"
         totalCount={files.length}
         components={gridComponents}
-        itemContent={(idx) => <Item data={filesWithData[idx]} />}
+        itemContent={(idx) => <Item data={filesWithData[idx]} removeFromFavorites={handleRemoveFromFav} />}
       />
     </>
   );
