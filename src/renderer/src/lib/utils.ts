@@ -13,3 +13,7 @@ export const pad = (num: number) => {
   const s = '0' + num;
   return s.substring(s.length - 2);
 };
+
+export const isFileVideo = (filePath: string) => {
+  return ['.mp4', '.mov', '.webm', '.m4a', '.m4v'].some((extension) => filePath.endsWith(extension));
+};

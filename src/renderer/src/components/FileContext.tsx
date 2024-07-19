@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './LoadingScreen';
+import { isFileVideo } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export const FileContextProvider = createContext<{
@@ -53,9 +54,7 @@ export const FileContext = ({ children }: TFileContextProvider) => {
   const isNext = index + 1 < files.length;
   const isPrevious = index - 1 >= 0;
   const selectedFile = files[index];
-  const isVideo = selectedFile
-    ? ['mp4', 'mov', 'webm', 'm4a', 'm4v'].some((extension) => selectedFile.endsWith(extension))
-    : false;
+  const isVideo = selectedFile ? isFileVideo(selectedFile) : false;
 
   const nextFile = () => setIndex(index + 1);
   const previousFile = () => setIndex(index - 1);
