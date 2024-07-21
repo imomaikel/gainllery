@@ -4,6 +4,8 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { isFileVideo } from '@/lib/utils';
 import Item from './Item';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Browse = () => {
   const [files, setFiles] = useState<string[]>(window.store.get('favoriteFiles', []));
@@ -56,12 +58,15 @@ const Browse = () => {
           <Item data={filesWithData[idx]} removeFromFavorites={handleRemoveFromFav} tileSize={tileSize} />
         )}
       />
-      <div className="fixed bottom-0 flex h-10 w-screen items-center border-t bg-background/50 px-4 backdrop-blur-sm">
+      <div className="fixed bottom-0 flex h-10 w-screen items-center justify-between border-t bg-background/50 px-4 backdrop-blur-sm">
         <div className="flex w-72 space-x-2">
           <Label className="shrink-0">Tile Size</Label>
           <Slider min={32} step={16} max={512} className="w-full" onValueChange={(value) => setTileSize(value[0])} />
           <span className="text-xs">({tileSize})</span>
         </div>
+        <Button size="sm" asChild>
+          <Link to="/">Home</Link>
+        </Button>
       </div>
     </>
   );
