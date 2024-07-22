@@ -1,12 +1,10 @@
-import { useFileContext } from '@/hooks/useFileContext';
+import Breadcrumbs from './Breadcrumbs';
 import { motion } from 'framer-motion';
 
 type TTopBar = {
   animationDuration: number;
 };
 const TopBar = ({ animationDuration }: TTopBar) => {
-  const { files, index } = useFileContext();
-
   return (
     <motion.div
       initial={{ height: 0 }}
@@ -15,12 +13,8 @@ const TopBar = ({ animationDuration }: TTopBar) => {
       transition={{ duration: animationDuration, type: 'tween' }}
       className="border-b bg-background"
     >
-      <div className="flex items-center px-2">
-        <div>
-          <span className="text-xs text-muted-foreground">
-            File {index + 1} of {files.length}
-          </span>
-        </div>
+      <div className="flex h-[25px] items-center justify-center">
+        <Breadcrumbs />
       </div>
     </motion.div>
   );
