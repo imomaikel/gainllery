@@ -114,7 +114,7 @@ export const registerIPCMainListeners = (window: BrowserWindow) => {
 
     const directoryPath = pick.filePaths[0];
 
-    broadcastEvent('redirect', `/browse?directoryPath=${directoryPath}`);
+    broadcastEvent('redirect', `/browse?path=${directoryPath}`);
   });
 
   // Get all files in a directory

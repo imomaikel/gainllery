@@ -17,8 +17,9 @@ export type IPCCalls = {
     };
     returns: {
       files: {
-        type: string;
+        type: 'file' | 'directory';
         path: string;
+        name: string;
       }[];
     };
   };

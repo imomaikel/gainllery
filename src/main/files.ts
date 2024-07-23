@@ -38,14 +38,14 @@ export const getAllFilesInDirectory = async (dirPath: string) => {
   const files = await readdir(dirPath, { withFileTypes: true });
 
   const fileList = files
-    .flatMap((dirent) => {
+    .flatMap<{ type: 'file' | 'directory'; path: string; name: string }>((dirent) => {
       if (dirent.isDirectory()) {
-        return [{ type: 'directory', path: dirent.name }];
+        return [{ type: 'directory', path: dirent.path, name: path.basename(dirent.name) }];
       } else {
         const filePath = resolve(dirent.path, dirent.name);
         const fileName = dirent.name.substring(dirent.name.lastIndexOf('.') + 1) as string;
         if (FILE_TYPES.includes(fileName.toLowerCase())) {
-          return [{ type: 'file', path: filePath }];
+          return [{ type: 'file', path: filePath, name: path.basename(filePath) }];
         }
         return [];
       }

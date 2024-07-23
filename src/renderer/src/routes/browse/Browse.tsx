@@ -1,20 +1,36 @@
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { VirtuosoGrid, GridComponents } from 'react-virtuoso';
-import { forwardRef, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { isFileVideo } from '@/lib/utils';
 import Item from './Item';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 
 const Browse = () => {
-  const [files, setFiles] = useState<string[]>(window.store.get('favoriteFiles', []));
+  const [searchParams] = useSearchParams();
+  const pathToView = searchParams.get('path');
+
+  const [files, setFiles] = useState<
+    {
+      type: 'file' | 'directory';
+      path: string;
+      name: string;
+    }[]
+  >([]);
   const [tileSize, setTileSize] = useState(256);
 
+  useEffect(() => {
+    if (!pathToView || pathToView.length <= 2) return;
+    setFiles(window.ipc.sendSync('getAllFilesInDirectory', { path: pathToView }).files);
+  }, [pathToView]);
+
   const filesWithData = useMemo(() => {
-    const withData = files.map((filePath) => ({
-      filePath,
-      isVideo: isFileVideo(filePath),
+    const withData = files.map((file) => ({
+      path: file.path,
+      fileType: file.type,
+      isVideo: isFileVideo(file.path),
+      name: file.name,
     }));
     return withData;
   }, [files.length]);
@@ -43,9 +59,12 @@ const Browse = () => {
   );
 
   const handleRemoveFromFav = (path: string) => {
-    const filteredFiles = files.filter((filePath) => filePath !== path);
+    const filteredFiles = files.filter((file) => file.path !== path);
     setFiles(filteredFiles);
-    window.store.set('favoriteFiles', filteredFiles);
+    window.store.set(
+      'favoriteFiles',
+      filteredFiles.map((entry) => entry.path),
+    );
   };
 
   return (

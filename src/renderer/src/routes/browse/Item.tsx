@@ -1,23 +1,36 @@
-import { FaHeartBroken } from 'react-icons/fa';
+// import { FaHeartBroken } from 'react-icons/fa';
+import { FaFolder } from 'react-icons/fa6';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 type TItem = {
   data: {
-    filePath: string;
+    path: string;
+    name: string;
     isVideo: boolean;
+    fileType: 'file' | 'directory';
   };
   removeFromFavorites: (path: string) => void;
   tileSize: number;
 };
 const Item = ({ data, removeFromFavorites, tileSize }: TItem) => {
-  const { filePath, isVideo } = data;
+  const { name, path, isVideo, fileType } = data;
 
   return (
     <div className="relative h-full w-full rounded border">
-      {isVideo ? (
-        <video src={`atom://${filePath}`} className="h-full w-full rounded object-cover" muted />
+      {fileType === 'file' ? (
+        isVideo ? (
+          <video src={`atom://${path}`} className="h-full w-full rounded object-cover" muted />
+        ) : (
+          <img src={`atom://${path}`} className="h-full w-full rounded object-cover" />
+        )
       ) : (
-        <img src={`atom://${filePath}`} className="h-full w-full rounded object-cover" />
+        <div className="flex h-full flex-col items-center justify-between py-4">
+          <FaFolder size={tileSize / 1.5} />
+          <Link to={`/browse?path=${path}\\${name}`} className="text-sm">
+            {name}
+          </Link>
+        </div>
       )}
       <div
         className={cn(
@@ -26,9 +39,9 @@ const Item = ({ data, removeFromFavorites, tileSize }: TItem) => {
         )}
         role="button"
         aria-label="remove from favorites"
-        onDoubleClick={() => removeFromFavorites(filePath)}
+        onDoubleClick={() => removeFromFavorites(path)}
       >
-        <FaHeartBroken className={cn('h-6 w-6', tileSize <= 64 && 'h-4 w-4', tileSize <= 32 && 'h-2 w-2')} />
+        {/* <FaHeartBroken className={cn('h-6 w-6', tileSize <= 64 && 'h-4 w-4', tileSize <= 32 && 'h-2 w-2')} /> */}
       </div>
     </div>
   );

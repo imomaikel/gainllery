@@ -25,7 +25,7 @@ const Breadcrumbs = () => {
 
     const pathsWithName = splitPath.map((name, idx) => ({
       name,
-      path: splitPath.slice(0, idx + 1).join('\\'),
+      path: `/browse?path=${splitPath.slice(0, idx + 1).join('\\')}`,
     }));
 
     const lastItem = splitPath[splitPath.length - 1];
